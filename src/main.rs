@@ -22,9 +22,8 @@ const OPERATORS: &'static [&'static str] = &["+", "-", "*", "/", "="];
 //     free(buffer);  // Free memory explicitly
 //     let error = borrow(buffer);  // Compile-time error: Cannot borrow after free
 // }";
-// fn read_source_code(file_path:&str) -> str{
-    
-// }
+
+
 //USE : cargo run -- source_code.txt
 fn main() {
     // //0. get command line argument (file path)
@@ -73,6 +72,7 @@ fn main() {
     // 3. split by whitespace
     let str_tokens = code_without_comments.split_whitespace();
 
+
     // 4. tokenize
     let tokens: Vec<Token> = str_tokens.map(|s| Token::parse(s)).flatten().collect();
 
@@ -87,7 +87,12 @@ fn main() {
     println!();
 }
 
+
+
+
+
 impl Token {
+    
     fn parse(s: &str) -> Vec<Token> {
         if s.is_empty() {
             return vec![];

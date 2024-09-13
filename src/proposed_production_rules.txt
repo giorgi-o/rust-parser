@@ -1,0 +1,32 @@
+<Line> : starter
+
+{base instructions}
+<Line> => <Assignee> = <Assigner> ;
+<Line> => <Expression> + <Expression> ;
+<Line> => <Expression> - <Expression> ;
+<Line> => <Expression> * <Expression> ;
+<Line> => <Expression> / <Expression> ;
+
+{solo instructions. only allowing free because we do not need to reference it after free so no need for assignment}
+<Line> => Free(<Expression>) ;
+
+{possible values for "Assigner"}
+<Assigner> => borrow(<Expression>) 
+<Assigner> => allocate(<Expression>)
+<Assigner> => < {Token: Number} >
+<Assigner> => < {Token:  Identifier } >
+<Assigner> => <Expression>
+
+{"Assignee" possible values}
+<Assignee> => < {Token: Identifier} >
+<Assigner> => <Expression>
+
+{"Exprrssion" possible values}
+<Expression> => < {Token: Number} >
+<Expression> => < {Token: Identifier} >
+<Expression> => <Expression> + <Expression>
+<Expression> => <Expression> - <Expression>
+<Expression> => <Expression> * <Expression>
+<Expression> => <Expression> / <Expression>
+<Expression> => borrow(<Expression>)
+<Expression> => allocate(<Expression>)
