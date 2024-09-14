@@ -1,0 +1,5 @@
+region SafeProcessing {
+    let buffer = allocate(1024);  // Allocate memory
+    free(buffer);  // Free memory explicitly
+    let error = borrow(buffer);  // Compile-time error: Cannot borrow after free
+}

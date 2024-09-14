@@ -1,3 +1,6 @@
+use std::env;
+use std::fs;
+
 #[derive(Debug)]
 enum Token {
     Identifier(String),
@@ -14,19 +17,52 @@ enum Token {
 const KEYWORDS: &'static [&'static str] = &["region", "let"];
 const OPERATORS: &'static [&'static str] = &["+", "-", "*", "/", "="];
 
-const CODE: &str = "region SafeProcessing {
-    let buffer = allocate(1024);  // Allocate memory
-    free(buffer);  // Free memory explicitly
-    let error = borrow(buffer);  // Compile-time error: Cannot borrow after free
-}";
-
+// const CODE: &str = "region SafeProcessing {
+//     let buffer = allocate(1024);  // Allocate memory
+//     free(buffer);  // Free memory explicitly
+//     let error = borrow(buffer);  // Compile-time error: Cannot borrow after free
+// }";
+// fn read_source_code(file_path:&str) -> str{
+    
+// }
+//USE : cargo run -- source_code.txt
 fn main() {
-    // 1. remove comments
+    // //0. get command line argument (file path)
+    let args: Vec<String> = env::args().collect();
+    dbg!(&args);
+    let file_path = &args[1];
+
+    // 1. read source code from file
+    let source_code = fs::read_to_string(file_path);
+    let mut source_code_string : Option<String> = None;
+
+    match source_code {
+        Ok(source_code_str) => {
+            println!("Source code: \n{source_code_str}");
+            source_code_string = Some(source_code_str);
+           
+        }
+        Err(error) => {
+            eprintln!("Error reading from file:\n{error}");
+            std::process::exit(1);
+        }
+        
+    }
+   
+
+    // 2. remove comments
     let mut code_lines_without_comments = vec![];
-    for line in CODE.lines() {
+    if let Some(ref code_with_comments)= source_code_string {
+    for line in code_with_comments.lines() {
         let line_without_comments = line.split("//").next().unwrap();
         code_lines_without_comments.push(line_without_comments);
     }
+    }
+    else {
+        eprintln!("No source code in file :)");
+        std::process::exit(1);
+    }
+
     let code_without_comments = code_lines_without_comments.join("\n");
 
     println!("1. Code without comments:");
@@ -34,10 +70,10 @@ fn main() {
         println!("{line}");
     }
 
-    // 2. split by whitespace
+    // 3. split by whitespace
     let str_tokens = code_without_comments.split_whitespace();
 
-    // 3. tokenize
+    // 4. tokenize
     let tokens: Vec<Token> = str_tokens.map(|s| Token::parse(s)).flatten().collect();
 
     println!("\n3. Tokens:");
