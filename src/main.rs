@@ -15,8 +15,8 @@ pub enum Keyword {
     Region,
     /// `let`
     Let,
-    /// `fn`
-    Fn,
+    /// `function`
+    Function,
     /// `return`
     Return,
     /// `if`

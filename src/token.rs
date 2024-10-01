@@ -47,7 +47,7 @@ impl Token {
             let parsed = Token::parse(word, context)?;
             tokens.extend(parsed);
             column += word.len() + 1; // +1 for the space
-            // todo: above doesn't work if multiple spaces between words
+                                      // todo: above doesn't work if multiple spaces between words
         }
 
         Ok(tokens)
@@ -81,7 +81,7 @@ impl Token {
             // keywords
             ("region", Token::Keyw(Keyword::Region)),
             ("let", Token::Keyw(Keyword::Let)),
-            ("fn", Token::Keyw(Keyword::Fn)),
+            ("fn", Token::Keyw(Keyword::Function)),
         ] {
             if let Some(tokens) = Token::parse_with_separator(s, context.clone(), token, char)? {
                 return Ok(tokens);

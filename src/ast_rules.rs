@@ -105,7 +105,7 @@ impl Parser {
         p.add_rule(
             Function,
             &[
-                Keyw(Keyword::Fn).into(),
+                Keyw(Keyword::Function).into(),
                 AnyIdent,
                 Lpar.into(),
                 AnyIdent,
