@@ -81,7 +81,10 @@ impl Token {
             // keywords
             ("region", Token::Keyw(Keyword::Region)),
             ("let", Token::Keyw(Keyword::Let)),
-            ("fn", Token::Keyw(Keyword::Function)),
+            ("function", Token::Keyw(Keyword::Function)),
+            ("return", Token::Keyw(Keyword::Return)),
+            ("if", Token::Keyw(Keyword::If)),
+            ("for", Token::Keyw(Keyword::For)),
         ] {
             if let Some(tokens) = Token::parse_with_separator(s, context.clone(), token, char)? {
                 return Ok(tokens);
