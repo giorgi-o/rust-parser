@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::token::{TextToken, Token};
+use crate::{
+    token::{TextToken, Token},
+    Operator,
+};
 
 pub fn parse(tokens: &[TextToken]) -> Result<Vec<ParsedState>, String> {
     let parser = Parser::new();
@@ -21,15 +24,28 @@ pub fn parse(tokens: &[TextToken]) -> Result<Vec<ParsedState>, String> {
     Ok(parsed_states)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum SyntaxNode {
     Region {
         name: String,
         body: Vec<SyntaxNode>,
     },
+    VariableDefinition {
+        name: String,
+    },
     Assignment {
-        assignee: Token,
+        assignee: String,
         assigner: Box<SyntaxNode>,
+    },
+    Operation {
+        left: Box<SyntaxNode>,
+        operator: Operator,
+        right: Box<SyntaxNode>,
+    },
+    /// e.g. obj.field (could also be a.b.c.field)
+    ObjAccessor {
+        obj: Box<SyntaxNode>,
+        field: String,
     },
     FunctionDefinition {
         name: String,
@@ -37,10 +53,24 @@ pub enum SyntaxNode {
         body: Vec<SyntaxNode>,
     },
     FunctionCall {
-        name: Token,
+        name: String,
         arguments: Vec<SyntaxNode>,
     },
-    Value(Token),
+    FunctionReturn {
+        value: Box<SyntaxNode>,
+    },
+    IfStatement {
+        condition: Box<SyntaxNode>,
+        body: Vec<SyntaxNode>,
+    },
+    ForStatement {
+        initializer: Box<SyntaxNode>,
+        condition: Box<SyntaxNode>,
+        increment: Box<SyntaxNode>,
+        body: Vec<SyntaxNode>,
+    },
+    /// Could be a variable name or a number
+    Value(String),
 }
 
 /// state as in finite state machine state
@@ -59,8 +89,8 @@ pub enum ParserState {
     IfStatement,
     ForStatement,
     Token(Token),
-    Ident,
-    Number,
+    AnyIdent,
+    AnyNumber,
 }
 
 impl ParserState {
@@ -71,8 +101,13 @@ impl ParserState {
         }
     }
 
+    /// short hand for s.as_token().as_ident()
+    pub fn as_ident_token(&self) -> String {
+        self.as_token().as_ident()
+    }
+
     fn is_leaf(&self) -> bool {
-        matches!(self, Self::Token(_) | Self::Ident | Self::Number)
+        matches!(self, Self::AnyIdent | Self::AnyNumber)
     }
 
     fn try_parse_leaf(&self, token: &TextToken) -> Option<Token> {
@@ -91,16 +126,16 @@ impl ParserState {
                 }
             }
 
-            Self::Ident => {
-                if let Token::Identifier(_) = token {
+            Self::AnyIdent => {
+                if let Token::Ident(_) = token {
                     Some(token.clone())
                 } else {
                     None
                 }
             }
 
-            Self::Number => {
-                if let Token::Number(_) = token {
+            Self::AnyNumber => {
+                if let Token::Num(_) = token {
                     Some(token.clone())
                 } else {
                     None
@@ -121,28 +156,31 @@ impl From<Token> for ParserState {
 pub struct ParserRule {
     from: ParserState,
     to: Vec<ParserState>,
-    transformer: fn(&[ParsedState]) -> Vec<SyntaxNode>,
+    transformer: Box<dyn Fn(&[ParsedState]) -> Vec<SyntaxNode>>,
 }
 
 impl ParserRule {
     pub fn new(
         from: ParserState,
         rules: Vec<ParserState>,
-        transformer: fn(&[ParsedState]) -> Vec<SyntaxNode>,
+        transformer: impl Fn(&[ParsedState]) -> Vec<SyntaxNode> + 'static,
     ) -> Self {
         Self {
             from,
             to: rules,
-            transformer,
+            transformer: Box::new(transformer),
         }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParsedState {
+    /// the CFG state whose rule matched successfully
     pub state: ParserState,
-    pub result: Vec<SyntaxNode>,
+    /// the states that were matched to get to this state.
     pub intermediate_states: Vec<ParsedState>,
+    /// the result of the rule's transformer
+    pub result: Vec<SyntaxNode>,
 }
 
 pub struct Parser {
@@ -150,7 +188,6 @@ pub struct Parser {
 }
 
 impl Parser {
-
     fn try_parse_tokens_as<'a>(
         &self,
         tokens: &'a [TextToken],
@@ -185,7 +222,7 @@ impl Parser {
                     let parsed = parsed.unwrap();
                     let intermediate_state = ParsedState {
                         state: intermediate_target.clone(),
-                        result: vec![SyntaxNode::Value(parsed)],
+                        result: vec![SyntaxNode::Value(parsed.as_value())],
                         intermediate_states: vec![],
                     };
 
@@ -233,7 +270,7 @@ impl Parser {
         &mut self,
         from: ParserState,
         rules: &[ParserState],
-        transformer: fn(&[ParsedState]) -> Vec<SyntaxNode>,
+        transformer: impl Fn(&[ParsedState]) -> Vec<SyntaxNode> + 'static,
     ) {
         let rule = ParserRule::new(from.clone(), rules.to_vec(), transformer);
 

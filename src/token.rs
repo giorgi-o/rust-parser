@@ -16,10 +16,10 @@ pub struct TokenContext {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Token {
-    Identifier(String),
-    Number(String),
-    Keyword(Keyword),
-    Operator(Operator),
+    Ident(String),
+    Num(String),
+    Keyw(Keyword),
+    Op(Operator),
     Lcur,   // Left curly brace {
     Rcur,   // Right curly brace }
     Lpar,   // Left parenthesis (
@@ -46,6 +46,8 @@ impl Token {
 
             let parsed = Token::parse(word, context)?;
             tokens.extend(parsed);
+            column += word.len() + 1; // +1 for the space
+            // todo: above doesn't work if multiple spaces between words
         }
 
         Ok(tokens)
@@ -68,18 +70,18 @@ impl Token {
             ("[", Token::Lbrack),
             ("]", Token::Rbrack),
             // operators
-            ("+", Token::Operator(Operator::Plus)),
-            ("-", Token::Operator(Operator::Minus)),
-            ("*", Token::Operator(Operator::Mult)),
-            ("/", Token::Operator(Operator::Div)),
-            ("=", Token::Operator(Operator::Assign)),
-            ("<", Token::Operator(Operator::LessThan)),
-            (">", Token::Operator(Operator::GreaterThan)),
-            (".", Token::Operator(Operator::Dot)),
+            ("+", Token::Op(Operator::Plus)),
+            ("-", Token::Op(Operator::Minus)),
+            ("*", Token::Op(Operator::Mult)),
+            ("/", Token::Op(Operator::Div)),
+            ("=", Token::Op(Operator::Assign)),
+            ("<", Token::Op(Operator::LessThan)),
+            (">", Token::Op(Operator::GreaterThan)),
+            (".", Token::Op(Operator::Dot)),
             // keywords
-            ("region", Token::Keyword(Keyword::Region)),
-            ("let", Token::Keyword(Keyword::Let)),
-            ("fn", Token::Keyword(Keyword::Fn)),
+            ("region", Token::Keyw(Keyword::Region)),
+            ("let", Token::Keyw(Keyword::Let)),
+            ("fn", Token::Keyw(Keyword::Fn)),
         ] {
             if let Some(tokens) = Token::parse_with_separator(s, context.clone(), token, char)? {
                 return Ok(tokens);
@@ -89,7 +91,7 @@ impl Token {
         // Handle numbers
         if s.parse::<i128>().is_ok() || s.parse::<f64>().is_ok() {
             return Ok(vec![TextToken {
-                token: Token::Number(s.to_string()),
+                token: Token::Num(s.to_string()),
                 context,
             }]);
         }
@@ -98,7 +100,7 @@ impl Token {
         // NOTE: this assumes variables can't be called e.g. `x2`
         if s.chars().all(char::is_alphabetic) {
             return Ok(vec![TextToken {
-                token: Token::Identifier(s.to_string()),
+                token: Token::Ident(s.to_string()),
                 context,
             }]);
         }
@@ -158,10 +160,22 @@ impl Token {
         Ok(Some(tokens))
     }
 
+    /// If this token is an identifier, stringify it.
+    /// Otherwise, panic.
     pub fn as_ident(&self) -> String {
         match self {
-            Token::Identifier(s) => s.to_string(),
+            Token::Ident(s) => s.to_string(),
             _ => panic!("Token::as_ident called on non-Identifier token"),
+        }
+    }
+
+    /// If this token is a variable name (Identifier) or a number, stringify it.
+    /// Otherwise, panic.
+    pub fn as_value(&self) -> String {
+        match self {
+            Token::Ident(s) => s.to_string(),
+            Token::Num(s) => s.to_string(),
+            _ => panic!("Token::as_value called on non-Value (non-leaf) token"),
         }
     }
 }

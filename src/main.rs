@@ -1,6 +1,6 @@
-pub mod token;
 pub mod ast;
 pub mod ast_rules;
+pub mod token;
 
 use std::env;
 use std::fs;
@@ -9,10 +9,7 @@ use string_enum::StringEnum;
 use token::Token;
 use token::TokenContext;
 
-
-
-
-#[derive(StringEnum, Clone, PartialEq, Eq, Hash)]
+#[derive(StringEnum, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Keyword {
     /// `region`
     Region,
@@ -20,9 +17,15 @@ pub enum Keyword {
     Let,
     /// `fn`
     Fn,
+    /// `return`
+    Return,
+    /// `if`
+    If,
+    /// `for`
+    For,
 }
 
-#[derive(StringEnum, Clone, PartialEq, Eq, Hash)]
+#[derive(StringEnum, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Operator {
     /// `+`
     Plus,
@@ -38,6 +41,10 @@ pub enum Operator {
     LessThan,
     /// `>`
     GreaterThan,
+    /// `<=`
+    LessThanOrEqual,
+    /// `>=`
+    GreaterThanOrEqual,
     /// `.`
     Dot,
 }
@@ -45,7 +52,10 @@ pub enum Operator {
 fn main() {
     let args: Vec<String> = env::args().collect();
     dbg!(&args);
-    let file_path = &args[1];
+    let file_path = args
+        .get(1)
+        .map(|s| s.as_str())
+        .unwrap_or("src/source_code.txt");
 
     let source_code = fs::read_to_string(file_path);
     let mut source_code_string: Option<String> = None;
@@ -82,7 +92,7 @@ fn main() {
     let mut tokens = vec![];
     for (line_number, line) in code_lines_without_comments.iter().enumerate() {
         let context = TokenContext {
-            filename: file_path.clone(),
+            filename: file_path.to_string(),
             line: line_number + 1,
             column: 1,
             line_content: line.to_string(),
@@ -107,8 +117,7 @@ fn main() {
             prev_line_number = token.context.line;
         }
     }
-    
-    
+
     println!("\n4. AST:");
     let ast_nodes = ast::parse(&tokens).expect("Error parsing AST");
     for node in &ast_nodes {
