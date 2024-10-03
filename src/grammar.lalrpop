@@ -1,14 +1,13 @@
 grammar;
 
+use crate::grammar_ast::{Region, Function};
 
-pub Region: (String, Vec<String>) = {
-    "region" <name:Ident> "{" <funcs:Function*> "}" => (name, funcs)
+pub Region: Region = {
+    "region" <name:Ident> "{" <funcs:Function*> "}" => Region { name, functions: funcs }
 };
 
-
-
-Function: String = {
-    "function" <name:Ident> "(" ")" => name
+Function: Function = {
+    "function" <name:Ident> "(" ")" => Function { name }
 };
 
 
