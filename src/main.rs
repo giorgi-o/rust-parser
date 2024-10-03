@@ -1,3 +1,6 @@
+use lalrpop_util::lalrpop_mod;
+lalrpop_mod!(grammar); 
+
 pub mod ast;
 pub mod ast_rules;
 pub mod token;
@@ -118,9 +121,32 @@ fn main() {
         }
     }
 
-    println!("\n4. AST:");
-    let ast_nodes = ast::parse(&tokens).expect("Error parsing AST");
-    for node in &ast_nodes {
-        println!("{node:?}");
-    }
+
+    println!("\n4. parser:");
+       // Test input: a region with two functions
+       let input = "region DataManagement { function allocate() 
+       function deallocate() }";
+    
+       // Parse the input using the generated parser
+       match grammar::RegionParser::new().parse(input) {
+           Ok((region_name, functions)) => {
+               // Print the region name
+               println!("Region: {}", region_name);
+               
+               // Print each function name
+               for function in functions {
+                   println!("Function: {}", function);
+               }
+           }
+           Err(e) => {
+               // If there's a parsing error, print the error
+               println!("Error parsing: {:?}", e);
+           }
+       }
+
+    // println!("\n4. AST:");
+    // let ast_nodes = ast::parse(&tokens).expect("Error parsing AST");
+    // for node in &ast_nodes {
+    //     println!("{node:?}");
+    // }
 }
