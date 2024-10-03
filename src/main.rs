@@ -1,16 +1,11 @@
 use lalrpop_util::lalrpop_mod;
-lalrpop_mod!(grammar); 
+lalrpop_mod!(grammar);
 mod grammar_ast;
-pub mod ast;
-pub mod ast_rules;
-pub mod token;
 
 use std::env;
 use std::fs;
 
 use string_enum::StringEnum;
-use token::Token;
-use token::TokenContext;
 
 #[derive(StringEnum, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Keyword {
@@ -85,62 +80,24 @@ fn main() {
         std::process::exit(1);
     }
 
-    let code_without_comments = code_lines_without_comments.join("\n");
-
     println!("1. Code without comments:");
     for line in &code_lines_without_comments {
         println!("{line}");
     }
 
-    let mut tokens = vec![];
-    for (line_number, line) in code_lines_without_comments.iter().enumerate() {
-        let context = TokenContext {
-            filename: file_path.to_string(),
-            line: line_number + 1,
-            column: 1,
-            line_content: line.to_string(),
-        };
+    let code_without_comments = code_lines_without_comments.join("\n");
 
-        let result = Token::tokenise_line(context);
-        match result {
-            Ok(mut t) => tokens.append(&mut t),
-            Err(e) => {
-                eprintln!("Error: {e}");
-                std::process::exit(1);
-            }
+    println!("\n2. tokeniser + parser:");
+
+    // Parse the input using the generated parser
+    match grammar::RegionParser::new().parse(&code_without_comments) {
+        Ok(region) => {
+            // Print the entire Region AST
+            println!("Parsed AST: {:#?}", region);
+        }
+        Err(e) => {
+            // If there's a parsing error, print the error
+            println!("Error parsing: {:?}", e);
         }
     }
-
-    println!("\n3. Tokens:");
-    let mut prev_line_number = 1;
-    for token in &tokens {
-        print!("{:?} ", token.token);
-        if token.context.line > prev_line_number {
-            println!();
-            prev_line_number = token.context.line;
-        }
-    }
-
-
-    println!("\n4. parser:");
-       // Test input: a region with two functions
-       let input = "region DataManagement { function allocate() function deallocate() }";
-    
-   // Parse the input using the generated parser
-   match grammar::RegionParser::new().parse(input) {
-    Ok(region) => {
-        // Print the entire Region AST
-        println!("Parsed AST: {:#?}", region);
-    }
-    Err(e) => {
-        // If there's a parsing error, print the error
-        println!("Error parsing: {:?}", e);
-    }
-}
-
-    // println!("\n4. AST:");
-    // let ast_nodes = ast::parse(&tokens).expect("Error parsing AST");
-    // for node in &ast_nodes {
-    //     println!("{node:?}");
-    // }
 }

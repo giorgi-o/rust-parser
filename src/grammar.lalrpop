@@ -1,6 +1,6 @@
 grammar;
 
-use crate::grammar_ast::{Region, Function};
+use crate::grammar_ast::{Region, Function, Variable};
 
 pub Region: Region = {
     "region" <name:Ident> "{" <funcs:Function*> "}" => Region { name, functions: funcs }
