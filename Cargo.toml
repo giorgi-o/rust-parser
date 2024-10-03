@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 string_enum = "0.4.4"
+gxhash = "3.4.1"
 

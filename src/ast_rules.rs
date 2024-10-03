@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use gxhash::HashMap;
 
 use crate::{
     ast::{Parser, ParserState, SyntaxNode},
@@ -59,7 +59,7 @@ impl Parser {
         use ParserState::*;
 
         let mut p = Self {
-            rules: HashMap::new(),
+            rules: Default::default(),
         };
 
         /**********************************

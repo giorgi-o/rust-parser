@@ -1,9 +1,11 @@
-use std::collections::HashMap;
+use gxhash::HashMap;
 
 use crate::{
     token::{TextToken, Token},
     Operator,
 };
+
+const MAX_RECURSION_DEPTH: u32 = 50;
 
 pub fn parse(tokens: &[TextToken]) -> Result<Vec<ParsedState>, String> {
     let parser = Parser::new();
@@ -11,7 +13,7 @@ pub fn parse(tokens: &[TextToken]) -> Result<Vec<ParsedState>, String> {
 
     let mut tokens = tokens;
     while !tokens.is_empty() {
-        let parse_result = parser.try_parse_tokens_as(tokens, &ParserState::Start);
+        let parse_result = parser.try_parse_tokens_as(tokens, &ParserState::Start, 0);
         if parse_result.is_none() {
             return Err("Failed to parse tokens".to_string());
         }
@@ -22,6 +24,17 @@ pub fn parse(tokens: &[TextToken]) -> Result<Vec<ParsedState>, String> {
     }
 
     Ok(parsed_states)
+}
+
+pub fn print_current_state(tokens_left: &[TextToken], state: &ParserState) {
+    // print while overwriting last line in console:
+    // Currently parsing:  13 tokens left, state: IfStatement     src/source_code.txt:3:1 if i < 3 {
+
+    let tokens_left = tokens_left.len();
+    // state len: pad/truncate to 15 chars
+    let state = format!("{:15?}", state);
+
+    let tokens_print = String
 }
 
 #[derive(Debug, Clone)]
@@ -192,7 +205,14 @@ impl Parser {
         &self,
         tokens: &'a [TextToken],
         state: &ParserState,
+        recursion_depth: u32,
     ) -> Option<(ParsedState, &'a [TextToken] /* unconsumed */)> {
+
+        if recursion_depth > MAX_RECURSION_DEPTH {
+            // prevent infinite recursion
+            return None;
+        }
+
         let rules = self.rules.get(state)?;
 
         for rule in rules {
@@ -229,7 +249,11 @@ impl Parser {
                     intermediate_states.push(intermediate_state);
                 } else {
                     // recursively try to parse the next tokens
-                    let result = self.try_parse_tokens_as(tokens.as_slice(), intermediate_target);
+                    let result = self.try_parse_tokens_as(
+                        tokens.as_slice(),
+                        intermediate_target,
+                        recursion_depth + 1,
+                    );
                     if result.is_none() {
                         // this rule doesn't match
                         matches = false;
