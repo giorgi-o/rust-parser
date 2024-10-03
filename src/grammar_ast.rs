@@ -7,54 +7,36 @@ pub struct Region {
 #[derive(Debug)]
 pub struct Function {
     pub name: String,
+    pub params: Vec<Variable>,    // Function parameters
+    pub body: Vec<Statement>,     // Function body consisting of statements
 }
 
+#[derive(Debug)]
+pub struct Variable {
+    pub name: String,
+    pub var_type: Type,           // Variable type (Int, String, etc.)
+}
 
-// #[derive(Debug)]
-// pub struct Region {
-//     pub name: String,
-//     pub functions: Vec<Function>,
-// }
+#[derive(Debug)]
+pub enum Statement {
+    Let(String, Expr),            // let buffer = allocateMemory(size);
+    Return(Expr),                 // return buffer;
+    Call(String, Vec<Expr>),      // Function call
+    If(Expr, Vec<Statement>),     // if condition
+    ForLoop(Expr, Expr, Vec<Statement>), // For loop (simplified for now)
+}
 
-// #[derive(Debug)]
-// pub struct Function {
-//     pub name: String,
-//     pub params: Vec<Variable>,   // Parameters as variables
-//     pub body: Vec<Expr>,         // Function body as a list of expressions
-// }
+#[derive(Debug)]
+pub enum Expr {
+    Number(i32),                  // Integer literals
+    StringLiteral(String),         // String literals
+    Variable(String),              // Variable references
+    Call(String, Vec<Expr>),       // Function call as an expression
+}
 
-// #[derive(Debug)]
-// pub enum Type {
-//     Int32,
-//     Bool,
-//     StringType,  // To avoid conflict with the Rust "String" type
-// }
-
-// #[derive(Debug)]
-// pub enum Expr {
-//     Number(i32),                          // For integer literals
-//     Bool(bool),                           // For boolean literals
-//     StringLiteral(String),                // For string literals
-//     Variable(String),                     // Reference to a variable
-//     BinaryOp(Box<Expr>, Opcode, Box<Expr>), // Binary operations like a + b
-//     Call(String, Vec<Expr>),              // Function call (name and arguments)
-// }
-
-// #[derive(Debug)]
-// pub struct Variable {
-//     pub name: String,
-//     pub var_type: Type,
-// }
-
-
-// #[derive(Debug)]
-// pub enum Opcode {
-//     Add,
-//     Sub,
-//     Mul,
-//     Div,
-// }
-
-
-
-
+#[derive(Debug)]
+pub enum Type {
+    Int32,                        // Integer type
+    StringType,                    // String type
+    Bool                          // Boolean type
+}
