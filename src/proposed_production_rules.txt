@@ -1,11 +1,9 @@
-<Line> : starter
+{START: line}
+START: <line> ;
+<Line> : starter state, must end with ;
 
 {base instructions}
 <Line> => <Assignee> = <Assigner> ;
-<Line> => <Expression> + <Expression> ;
-<Line> => <Expression> - <Expression> ;
-<Line> => <Expression> * <Expression> ;
-<Line> => <Expression> / <Expression> ;
 
 {solo instructions. only allowing free because we do not need to reference it after free so no need for assignment}
 <Line> => Free(<Expression>) ;
@@ -14,14 +12,14 @@
 <Assigner> => borrow(<Expression>) 
 <Assigner> => allocate(<Expression>)
 <Assigner> => < {Token: Number} >
-<Assigner> => < {Token:  Identifier } >
+<Assigner> => < {Token: Identifier} >
 <Assigner> => <Expression>
 
 {"Assignee" possible values}
 <Assignee> => < {Token: Identifier} >
-<Assigner> => <Expression>
+<Assignee> => let < {Token: Identifier} >
 
-{"Exprrssion" possible values}
+{"Expression" possible values}
 <Expression> => < {Token: Number} >
 <Expression> => < {Token: Identifier} >
 <Expression> => <Expression> + <Expression>
@@ -30,3 +28,50 @@
 <Expression> => <Expression> / <Expression>
 <Expression> => borrow(<Expression>)
 <Expression> => allocate(<Expression>)
+
+
+=====
+
+START => <Keyword:region> <Identifier> { <Functions> } START
+START => <Empty>
+
+Functions => <Function>
+Functions => <Function> <Functions>
+
+Function => <Keyword:function> <Identifier> ( <Identifier> ) { <Lines> }
+
+Lines => <LineAndSemi>
+Lines => <LineAndSemi> <Lines>
+
+LineAndSemi => Line ;
+
+Line => <Keyword:let> <Identifier> = <Rvalue>
+Line => <Lvalue> = <Rvalue>
+Line => return <Rvalue>
+Line => FunctionCall
+Line => IfStatement
+Line => ForStatement
+
+Lvalue => <Identifier>
+Lvalue => Lvalue . <Identifier>
+
+Rvalue => Lvalue
+Rvalue => <Number>
+Rvalue => FunctionCall
+Rvalue => Rvalue + Rvalue
+Rvalue => Rvalue - Rvalue
+Rvalue => Rvalue * Rvalue
+Rvalue => Rvalue / Rvalue
+Rvalue => Rvalue > Rvalue
+Rvalue => Rvalue < Rvalue
+Rvalue => Rvalue >= Rvalue
+Rvalue => Rvalue <= Rvalue
+
+FunctionCall => <Identifier> ( <FunctionArgs> )
+
+FunctionArgs => Rvalue
+FunctionArgs => Rvalue , FunctionArgs
+
+IfStatement => if Rvalue { Lines }
+
+ForStatement => for ( Line ; Rvalue ; Line ) { Lines }

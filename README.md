@@ -1,1 +1,1 @@
-to test, run cargo run -- source_code.txt in the main directory
+to test, run `cargo run -- source_code.txt` in the `src` directory
