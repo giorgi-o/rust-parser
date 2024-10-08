@@ -94,9 +94,6 @@ enum SyntaxNode {
     Value(Token),
 }
 
-const KEYWORDS: &'static [&'static str] = &["region", "let"];
-const OPERATORS: &'static [&'static str] = &["+", "-", "*", "/", "="];
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     dbg!(&args);
@@ -138,7 +135,7 @@ fn main() {
     }
 
     let tokens =
-        Tokeniser::parse(&file_path, &code_without_comments).expect("Error parsing tokens");
+        Tokeniser::tokenise(&file_path, &code_without_comments).expect("Error parsing tokens");
 
     println!("\n3. Tokens:");
     for token in &tokens {
@@ -148,65 +145,4 @@ fn main() {
         }
     }
     println!();
-}
-impl Token {
-    fn parse(s: &str, line_number: usize, line_content: &str) -> Result<Vec<Token>, String> {
-        if s.is_empty() {
-            return Ok(vec![]);
-        }
-
-        // Handle special characters like parentheses, commas, braces, and square brackets
-        for (special_char, token) in [
-            ("{", Token::Lcur),
-            ("}", Token::Rcur),
-            ("(", Token::Lpar),
-            (")", Token::Rpar),
-            (";", Token::Semi),
-            (",", Token::Comma),
-            ("[", Token::Lbrack), // Left square bracket [
-            ("]", Token::Rbrack), // Right square bracket ]
-                                  // ("<", Token::Operator("<".to_string())), // Comparison operator <
-                                  // (">", Token::Operator(">".to_string())), // Comparison operator >
-                                  // (".", Token::Operator(".".to_string())), // Handle the dot (.)
-        ] {
-            if s == special_char {
-                return Ok(vec![token]);
-            }
-
-            let index_of_special_char = s.find(special_char);
-            if let Some(index) = index_of_special_char {
-                let mut tokens = vec![];
-                tokens.extend(Token::parse(&s[..index], line_number, line_content)?);
-                tokens.push(token);
-                tokens.extend(Token::parse(&s[index + 1..], line_number, line_content)?);
-                return Ok(tokens);
-            }
-        }
-
-        // Handle keywords
-        if KEYWORDS.contains(&s) {
-            // return Ok(vec![Token::Keyword(s.to_string())]);
-        }
-
-        // Handle operators
-        if OPERATORS.contains(&s) {
-            // return Ok(vec![Token::Operator(s.to_string())]);
-        }
-
-        // Handle numbers
-        if s.parse::<i128>().is_ok() || s.parse::<f64>().is_ok() {
-            return Ok(vec![Token::Number(s.to_string())]);
-        }
-
-        // Handle identifiers (like function names, variable names, etc.)
-        if s.chars().all(char::is_alphabetic) {
-            return Ok(vec![Token::Identifier(s.to_string())]);
-        }
-
-        // If the token cannot be parsed, return an error
-        Err(format!(
-            "Unparseable token: '{}' on line {}: '{}'",
-            s, line_number, line_content
-        ))
-    }
 }
