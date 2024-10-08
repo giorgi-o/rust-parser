@@ -1,29 +1,96 @@
+pub mod token_fsm;
+
 use std::env;
 use std::fs;
 
+use strum::AsRefStr;
+use strum::Display;
+use strum::EnumIter;
+use token_fsm::Tokeniser;
+
 #[derive(Debug, Clone, PartialEq)]
-enum Token {
-    Identifier(String),
-    Number(String),
-    Keyword(String),
-    Operator(String),
-    Lcur,  // Left curly brace {
-    Rcur,  // Right curly brace }
-    Lpar,  // Left parenthesis (
-    Rpar,  // Right parenthesis )
-    Semi,  // Semicolon ;
-    Comma, // Comma ,
-    Lbrack,  // Left square bracket [
-    Rbrack,  // Right square bracket ]
+pub enum Token {
+    Identifier(String), // [a-zA-Z][a-zA-Z0-9]*
+    Number(String),     // -?[0-9]+(.[0-9]+)?
+    Keyword(Keyword),   // region, let, function, return, if, for
+    Operator(Operator), // +, -, *, /, =, <, >, <=, >=
+    Lcur,               // Left curly brace {
+    Rcur,               // Right curly brace }
+    Lpar,               // Left parenthesis (
+    Rpar,               // Right parenthesis )
+    Semi,               // Semicolon ;
+    Comma,              // Comma ,
+    Dot,                // Dot .
+    Lbrack,             // Left square bracket [
+    Rbrack,             // Right square bracket ]
 }
 
+#[derive(AsRefStr, Display, EnumIter, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Keyword {
+    /// `region`
+    Region,
+    /// `let`
+    Let,
+    /// `function`
+    Function,
+    /// `return`
+    Return,
+    /// `if`
+    If,
+    /// `for`
+    For,
+}
+
+#[derive(AsRefStr, Display, EnumIter, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Operator {
+    /// `+`
+    #[strum(serialize = "+")]
+    Plus,
+    /// `-`
+    #[strum(serialize = "-")]
+    Minus,
+    /// `*`
+    #[strum(serialize = "*")]
+    Mult,
+    /// `/`
+    #[strum(serialize = "/")]
+    Div,
+    /// `=`
+    #[strum(serialize = "=")]
+    Assign,
+    /// `<`
+    #[strum(serialize = "<")]
+    LessThan,
+    /// `>`
+    #[strum(serialize = ">")]
+    GreaterThan,
+    /// `<=`
+    #[strum(serialize = "<=")]
+    LessThanOrEqual,
+    /// `>=`
+    #[strum(serialize = ">=")]
+    GreaterThanOrEqual,
+}
 
 #[derive(Debug)]
 enum SyntaxNode {
-    Region { name: String, body: Vec<SyntaxNode> },
-    Assignment { assignee: Token, assigner: Box<SyntaxNode> },
-    FunctionDefinition { name: Token, parameters: Vec<Token>, body: Vec<SyntaxNode> }, // Changed
-    FunctionCall { name: Token, arguments: Vec<Box<SyntaxNode>> }, // Changed
+    Region {
+        name: String,
+        body: Vec<SyntaxNode>,
+    },
+    Assignment {
+        assignee: Token,
+        assigner: Box<SyntaxNode>,
+    },
+    FunctionDefinition {
+        name: Token,
+        parameters: Vec<Token>,
+        body: Vec<SyntaxNode>,
+    }, // Changed
+    FunctionCall {
+        name: Token,
+        arguments: Vec<Box<SyntaxNode>>,
+    }, // Changed
     Value(Token),
 }
 
@@ -33,9 +100,12 @@ const OPERATORS: &'static [&'static str] = &["+", "-", "*", "/", "="];
 fn main() {
     let args: Vec<String> = env::args().collect();
     dbg!(&args);
-    let file_path = &args[1];
+    let file_path = args
+        .get(1)
+        .cloned()
+        .unwrap_or("src/source_code.txt".to_string());
 
-    let source_code = fs::read_to_string(file_path);
+    let source_code = fs::read_to_string(&file_path);
     let mut source_code_string: Option<String> = None;
 
     match source_code {
@@ -67,19 +137,8 @@ fn main() {
         println!("{line}");
     }
 
-    let mut tokens = vec![];
-    for (line_number, line) in code_lines_without_comments.iter().enumerate() {
-        let str_tokens = line.split_whitespace();
-        for token in str_tokens {
-            match Token::parse(token, line_number + 1, line) {
-                Ok(mut t) => tokens.append(&mut t),
-                Err(e) => {
-                    eprintln!("Error: {e}");
-                    std::process::exit(1);
-                }
-            }
-        }
-    }
+    let tokens =
+        Tokeniser::parse(&file_path, &code_without_comments).expect("Error parsing tokens");
 
     println!("\n3. Tokens:");
     for token in &tokens {
@@ -104,11 +163,11 @@ impl Token {
             (")", Token::Rpar),
             (";", Token::Semi),
             (",", Token::Comma),
-            ("[", Token::Lbrack),  // Left square bracket [
-            ("]", Token::Rbrack),  // Right square bracket ]
-            ("<", Token::Operator("<".to_string())),  // Comparison operator <
-            (">", Token::Operator(">".to_string())),  // Comparison operator >
-            (".", Token::Operator(".".to_string())),  // Handle the dot (.)
+            ("[", Token::Lbrack), // Left square bracket [
+            ("]", Token::Rbrack), // Right square bracket ]
+                                  // ("<", Token::Operator("<".to_string())), // Comparison operator <
+                                  // (">", Token::Operator(">".to_string())), // Comparison operator >
+                                  // (".", Token::Operator(".".to_string())), // Handle the dot (.)
         ] {
             if s == special_char {
                 return Ok(vec![token]);
@@ -126,12 +185,12 @@ impl Token {
 
         // Handle keywords
         if KEYWORDS.contains(&s) {
-            return Ok(vec![Token::Keyword(s.to_string())]);
+            // return Ok(vec![Token::Keyword(s.to_string())]);
         }
 
         // Handle operators
         if OPERATORS.contains(&s) {
-            return Ok(vec![Token::Operator(s.to_string())]);
+            // return Ok(vec![Token::Operator(s.to_string())]);
         }
 
         // Handle numbers
