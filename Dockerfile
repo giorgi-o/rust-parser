@@ -11,4 +11,4 @@ COPY . .
 RUN cargo build
 
 # Run the specified Rust file
-CMD ["cargo", "run", "--", "examples/full.txt"]
+CMD ["cargo", "run", "--", "example_input_source_code/full.txt"]

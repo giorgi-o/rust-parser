@@ -17,13 +17,13 @@ Here are the different types of tokens in our language, in regex form:
 
 Our program is written in Rust. We provide two ways to run it, either using the Rust compiler, or using Docker.
 
-We also provide 6 example programs to try it on in the `examples/` folder, each showcasing different features of our language and how the tokeniser handles them. Additionally, the `error.txt` file showcases a scenario where it will fail to tokenise.
+We also provide 6 example programs to try it on in the `example_input_source_code/` folder, each showcasing different features of our language and how the tokeniser handles them. Additionally, the `error.txt` file showcases a scenario where it will fail to tokenise.
 
 ## Using Rust/Cargo
 
 Rust and Cargo (the package manager) can be installed using Rustup (the rust installer). You can find the instructions [here](https://www.rust-lang.org/learn/get-started).
 
-Once installed, simply run `cargo run -- examples/[file].txt`. The command will download all dependencies, compile the program, and run it on the specified file.
+Once installed, simply run `cargo run -- example_input_source_code/[file].txt`. The command will download all dependencies, compile the program, and run it on the specified file.
 
 ## Using Docker
 
@@ -31,7 +31,7 @@ A dockerfile is provided to run our tokeniser in a docker container. To use it, 
 
 ```dockerfile
 # Run the specified Rust file
-CMD ["cargo", "run", "--", "examples/full.txt"] # <- change this
+CMD ["cargo", "run", "--", "example_input_source_code/full.txt"] # <- change this
 ```
 
 Then, to build and run the container:
@@ -48,7 +48,7 @@ These two commands are also provided in the `run.sh` script.
 Example for a successful tokenisation:
 
 ```bash
-$ cargo run -- examples/full.txt
+$ cargo run -- example_input_source_code/full.txt
 # ... a bunch of other output
 
 3. Tokens:
@@ -58,10 +58,10 @@ $ cargo run -- examples/full.txt
 Example for a failed tokenisation:
 
 ```bash
-$ cargo run -- examples/error.txt
+$ cargo run -- example_input_source_code/error.txt
 # ... a bunch of other output
 
-Error parsing file examples/error.txt:2:13 while parsing token: 123a
+Error parsing file example_input_source_code/error.txt:2:13 while parsing token: 123a
 ```
 
 # Overview of the code
