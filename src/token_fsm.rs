@@ -205,7 +205,7 @@ impl Tokeniser {
                     // think it's a minus operator, but then realise it's a
                     // number.
                     if op == Operator::Minus && c.is_ascii_digit() {
-                        return Token::Number(cs).into();
+                        return Token::Number(full_token_str).into();
                     }
                 }
 
@@ -222,7 +222,7 @@ impl Tokeniser {
                 }
 
                 Token::Number(s) => {
-                    full_token_str = cs + &s;
+                    full_token_str = s.clone() + &cs;
 
                     if c.is_ascii_digit() {
                         return Token::Number(full_token_str).into();
