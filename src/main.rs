@@ -144,9 +144,11 @@ fn main() {
     println!("\n3. Tokens:");
     for token in &tokens {
         print!("{:?} ", token);
-        if matches!(token, Token::Semi | Token::Lcur | Token::Rcur) {
-            println!();
-        }
+
+        // uncomment to add newlines to pretty-print token stream:
+        // if matches!(token, Token::Semi | Token::Lcur | Token::Rcur) {
+        //     println!();
+        // }
     }
     println!();
 }
