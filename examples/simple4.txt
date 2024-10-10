@@ -1,0 +1,13 @@
+region ExampleRegion {
+    function foo(big) {
+        let count = 10;
+        let arr = [];
+
+        for(let i = 0; i < count; i = i + 1) {
+            let buffer = allocateMemory(1024);
+            arr.push(buffer);
+        }
+
+        return arr;
+    }
+}

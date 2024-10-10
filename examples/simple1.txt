@@ -1,0 +1,8 @@
+region TradingData {
+    let buffer = allocate(1024);  // Allocates 1024 bytes in the heap
+    let tempBuffer = borrow(buffer);  // Borrow a portion of memory from 'buffer'
+
+    // Do some work with temp_buffer
+    free(buffer);  // Explicitly free buffer
+
+}  // When the region ends, all remaining memory is cleaned up
