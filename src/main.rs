@@ -27,47 +27,51 @@ pub enum Token {
 
 #[derive(AsRefStr, Display, EnumIter, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Keyword {
-    /// `region`
+    #[strum(serialize = "region")]
     Region,
-    /// `let`
+
+    #[strum(serialize = "let")]
     Let,
-    /// `function`
+
+    #[strum(serialize = "function")]
     Function,
-    /// `return`
+
+    #[strum(serialize = "return")]
     Return,
-    /// `if`
+
+    #[strum(serialize = "if")]
     If,
-    /// `for`
+
+    #[strum(serialize = "for")]
     For,
 }
 
 #[derive(AsRefStr, Display, EnumIter, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Operator {
-    /// `+`
     #[strum(serialize = "+")]
     Plus,
-    /// `-`
+
     #[strum(serialize = "-")]
     Minus,
-    /// `*`
+
     #[strum(serialize = "*")]
     Mult,
-    /// `/`
+
     #[strum(serialize = "/")]
     Div,
-    /// `=`
+
     #[strum(serialize = "=")]
     Assign,
-    /// `<`
+
     #[strum(serialize = "<")]
     LessThan,
-    /// `>`
+
     #[strum(serialize = ">")]
     GreaterThan,
-    /// `<=`
+
     #[strum(serialize = "<=")]
     LessThanOrEqual,
-    /// `>=`
+
     #[strum(serialize = ">=")]
     GreaterThanOrEqual,
 }

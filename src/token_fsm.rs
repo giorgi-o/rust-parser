@@ -146,20 +146,20 @@ impl Tokeniser {
             TokeniserState::Start => {
                 // this is the first character so far
 
-                if c.is_alphabetic() {
-                    return Token::Identifier(cs).into();
-                }
-
-                if c.is_ascii_digit() {
-                    return Token::Number(cs).into();
-                }
-
                 if let Some(op) = Self::is_operator(&cs) {
                     return Token::Operator(op).into();
                 }
 
                 if let Some(special_token) = Self::is_special_token(c) {
                     return special_token.into();
+                }
+
+                if c.is_alphabetic() {
+                    return Token::Identifier(cs).into();
+                }
+
+                if c.is_ascii_digit() {
+                    return Token::Number(cs).into();
                 }
 
                 if c.is_whitespace() {
@@ -214,7 +214,9 @@ impl Tokeniser {
 
                     if let Some(kw) = Self::is_keyword(&full_token_str) {
                         return Token::Keyword(kw).into();
-                    } else if c.is_alphanumeric() {
+                    }
+                    
+                    if c.is_alphanumeric() {
                         return Token::Identifier(full_token_str).into();
                     }
                 }
