@@ -25,6 +25,28 @@ pub enum Token {
     Rbrack,             // Right square bracket ]
 }
 
+impl Token {
+    /// Print the token in the format required by programming assignment 1
+    /// <Token Type, Token Value>
+    pub fn fmt_type_and_value(&self) -> String {
+        match self {
+            Token::Identifier(value) => format!("<Identifier, {}>", value),
+            Token::Number(value) => format!("<Number, {}>", value),
+            Token::Keyword(value) => format!("<Keyword, {}>", value.as_ref()),
+            Token::Operator(value) => format!("<Operator, {}>", value.as_ref()),
+            Token::Lcur => format!("<Lcur, {{>"),
+            Token::Rcur => format!("<Rcur, }}>"),
+            Token::Lpar => format!("<Lpar, (>"),
+            Token::Rpar => format!("<Rpar, )>"),
+            Token::Semi => format!("<Semi, ;>"),
+            Token::Comma => format!("<Comma, ,>"),
+            Token::Dot => format!("<Dot, .>"),
+            Token::Lbrack => format!("<Lbrack, [>"),
+            Token::Rbrack => format!("<Rbrack, ]>"),
+        }
+    }
+}
+
 #[derive(AsRefStr, Display, EnumIter, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Keyword {
     #[strum(serialize = "region")]
@@ -141,12 +163,20 @@ fn main() {
         println!("{line}");
     }
 
-    let tokens =
-        Tokeniser::tokenise(&file_path, &code_without_comments).expect("Error parsing tokens");
+    let tokens_result =
+        Tokeniser::tokenise(&file_path, &code_without_comments);
+
+    let tokens = match tokens_result {
+        Ok(tokens) => tokens,
+        Err(error) => {
+            eprintln!("\n{error}");
+            std::process::exit(1);
+        }
+    };
 
     println!("\n3. Tokens:");
     for token in &tokens {
-        print!("{:?} ", token);
+        print!("{} ", token.fmt_type_and_value());
 
         // uncomment to add newlines to pretty-print token stream:
         // if matches!(token, Token::Semi | Token::Lcur | Token::Rcur) {
