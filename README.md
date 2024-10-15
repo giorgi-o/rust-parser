@@ -1,3 +1,8 @@
+# Names and UNIs of teammates
+
+- Ifesi Onubogu (io2249)
+- Giorgio Cavicchioli (gc3137)
+
 # Lexical grammar
 
 Here are the different types of tokens in our language, in regex form:
