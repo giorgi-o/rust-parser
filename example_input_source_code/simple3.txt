@@ -1,0 +1,10 @@
+region ExampleRegion {
+    function foo(big) {
+        let buffer;
+        if (big) {
+            buffer = allocateMemory(1024);
+        } else {
+            buffer = allocateMemory(128);
+        }
+    }
+}
