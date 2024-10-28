@@ -18,7 +18,8 @@ region DataManagement {
     }
 
     // A customizable function to allocate and use a block of memory
-    function processStream(streamSize, blocksize ) {
+    function processStream(streamSize ) { //NOTE: WE ONLY TKAE ONE PARAMTER
+        blocksize= 10
         let streamPtr = allocate(streamSize);   // Allocate memory for the stream
         let blocks = [];   // Create an empty list to store block pointers
 
