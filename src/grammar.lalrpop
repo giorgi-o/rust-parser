@@ -2,15 +2,15 @@ grammar;
 
 use crate::grammar_ast::{Region, Function, Variable};
 
-// Top-level region structure containing functions
+// Define the top-level structure with a region containing functions
 pub Region: Region = {
     "<Keyword, region>" <name:Identifier> "<Lcur, {>" <functions:Function+> "<Rcur, }>" =>
         Region { name, functions }
 };
 
-// Define a function with parameters and an empty body
+// Define a function with a parameter list and an empty body
 Function: Function = {
-    "<Keyword, function>" <name:Identifier> "<Lpar, (>" <params:ParameterList> "<Rpar, )>" "<Lcur, {>" "<Rcur, }>" =>
+    "<Keyword, function>" <name:Identifier> "<Lpar, (>" <params:Parameters> "<Rpar, )>" "<Lcur, {>" "<Rcur, }>" =>
         Function {
             name,
             params,
@@ -18,11 +18,8 @@ Function: Function = {
         }
 };
 
-// Define a list of parameters
-#[inline]
-ParameterList: Vec<Variable> = {
-    <params:Parameter+> => params
-};
+// Define a parameter list allowing multiple parameters separated by commas
+ParameterList: Vec<Variable> = CommaSeparated<Parameter>;
 
 // Define a single parameter
 Parameter: Variable = {
@@ -32,5 +29,23 @@ Parameter: Variable = {
     }
 };
 
+//Define parameters as comma-separated comma list
+Parameters: Vec<Variable> = {
+    => Vec::new(),
+
+    //single params
+    <param:Parameter> => vec![param],
+
+    <mut params:Parameters> "<Comma, ,>" <param:Parameter> => {
+        params.push(param);
+        params
+    }
+}
+
 // Match identifiers generically
 Identifier: String = r"<Identifier, [a-zA-Z_][a-zA-Z0-9_]*>" => <>.to_string();
+
+// Simplified comma-separated list rule for flexibility
+CommaSeparated<T>: Vec<T> = {
+    T+ => <>.into_iter().collect(),
+};

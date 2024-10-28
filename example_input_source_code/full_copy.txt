@@ -1,14 +1,12 @@
 region DataManagement {
     // Allocate a block of memory of customizable size
     function allocate(size) {
-        let buffer = allocateMemory(size);   // Allocate memory of 'size' bytes
-        return buffer;
-
+   
     }
      function free(ptr) {
       
     }
-   function processStream(streamSize ) {
+   function processStream( streamSize, streamSize) {
       
     }
   

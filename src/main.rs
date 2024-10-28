@@ -218,23 +218,28 @@ match RegionParser::new().parse(&serialized_tokens) {
         println!("Full error: {:?}", e);
 
         if let lalrpop_util::ParseError::InvalidToken { location } = e {
-            println!("Invalid token at location: {}", location);
-            
-            // Split serialized tokens string by whitespace to access individual tokens
+            println!("Invalid token at character location: {}", location);
+
+            // Split `serialized_tokens` into individual tokens
             let tokens: Vec<&str> = serialized_tokens.split_whitespace().collect();
 
-            // Print the problematic token directly from the serialized tokens string
-            let problematic_token_index = location; // This is where the error occurred
+            // Convert character location to token index
+            let mut char_count = 0;
+            let problematic_token_index = tokens.iter().position(|&token| {
+                char_count += token.len() + 1; // +1 for the space separator
+                char_count > location
+            }).unwrap_or_else(|| tokens.len().saturating_sub(1));
+
+            // Identify the problematic token
             let problematic_token = tokens.get(problematic_token_index).unwrap_or(&"Unknown token");
-
             println!("Problematic token: {}", problematic_token);
-            
-            // Define how many tokens before and after to display
-            let context_range = 3; // Number of tokens to show before the problematic token
-            let start = if problematic_token_index > context_range { problematic_token_index - context_range } else { 0 };
-            let end = (problematic_token_index + 1).min(tokens.len()); // Include the problematic token itself
 
-            // Print context around the problematic token
+            // Define the context range to show surrounding tokens
+            let context_range = 3;
+            let start = problematic_token_index.saturating_sub(context_range);
+            let end = (problematic_token_index + context_range + 1).min(tokens.len());
+
+            // Print context with improved formatting
             println!("Context around the problematic token:");
             for (i, token) in tokens.iter().enumerate().take(end).skip(start) {
                 if i == problematic_token_index {
@@ -246,6 +251,7 @@ match RegionParser::new().parse(&serialized_tokens) {
         }
     }
 }
+
 
 
 
