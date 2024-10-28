@@ -4,4 +4,7 @@ region DataManagement {
         
 
     }
+     function free(ptr) {
+        
+    }
 }

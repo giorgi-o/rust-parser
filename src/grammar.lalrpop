@@ -2,36 +2,35 @@ grammar;
 
 use crate::grammar_ast::{Region, Function, Variable};
 
-// Define the top-level structure to parse a `region` block
+// Top-level region structure containing functions
 pub Region: Region = {
-    "<Keyword, region>" <name:Identifier> "<Lcur, {" <functions:Function*> "<Rcur, }>" =>
+    "<Keyword, region>" <name:Identifier> "<Lcur, {>" <functions:Function+> "<Rcur, }>" =>
         Region { name, functions }
 };
 
-// Define a function inside a region
-pub Function: Function = {
-    "<Keyword, function>" <name:Identifier> "<Lpar, (>" <params:ParameterList> "<Rpar, )>" "<Lcur, {" "<Rcur, }>" =>
+// Define a function with parameters and an empty body
+Function: Function = {
+    "<Keyword, function>" <name:Identifier> "<Lpar, (>" <params:ParameterList> "<Rpar, )>" "<Lcur, {>" "<Rcur, }>" =>
         Function {
             name,
             params,
-            body: Vec::new(), // Placeholder for the body
+            body: Vec::new(), // Empty body placeholder
         }
 };
 
-// Match identifiers
-pub Identifier: String = {
-    r"<Identifier, ([a-zA-Z_][a-zA-Z0-9_]*)>" => <>.to_string()
-};
-
 // Define a list of parameters
-pub ParameterList: Vec<Variable> = {
+#[inline]
+ParameterList: Vec<Variable> = {
     <params:Parameter+> => params
 };
 
 // Define a single parameter
-pub Parameter: Variable = {
+Parameter: Variable = {
     <name:Identifier> => Variable {
         name,
-        var_type: crate::grammar_ast::Type::Int32 // Default type for demonstration
+        var_type: crate::grammar_ast::Type::Int32 // Default type
     }
 };
+
+// Match identifiers generically
+Identifier: String = r"<Identifier, [a-zA-Z_][a-zA-Z0-9_]*>" => <>.to_string();
