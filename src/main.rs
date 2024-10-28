@@ -1,3 +1,13 @@
+
+
+mod grammar_ast;
+use lalrpop_util::lalrpop_mod;
+lalrpop_mod!(grammar);
+
+use grammar::RegionParser;
+
+
+
 pub mod token_fsm;
 
 use std::env;
@@ -178,10 +188,72 @@ fn main() {
     for token in &tokens {
         print!("{} ", token.fmt_type_and_value());
 
-        // uncomment to add newlines to pretty-print token stream:
-        // if matches!(token, Token::Semi | Token::Lcur | Token::Rcur) {
-        //     println!();
-        // }
     }
+
+    let mut serialized_tokens = String::new();
+    println!("\n3.5. Serialized Tokens:"); // Updated label for clarity
+    for token in &tokens {
+        // Here we get the formatted string for each token
+        let token_str = token.fmt_type_and_value();
+        serialized_tokens.push_str(&token_str);
+        serialized_tokens.push(' '); // Add a space between tokens
+    }
+    
+    // Trim any trailing whitespace for clean output
+    serialized_tokens = serialized_tokens.trim_end().to_string();
+    
+    // Print the serialized tokens to verify correctness
+    println!("Serialized Tokens: {}", serialized_tokens);
+
+
+
+
+    println!("\n4. SerializedTokens:");
+println!("Serialized Tokens: {:?}", serialized_tokens);
+
+match RegionParser::new().parse(&serialized_tokens) {
+    Ok(region) => println!("Parsed AST: {:#?}", region),
+    Err(e) => {
+        println!("Error parsing: {:?}", e);
+        println!("Full error: {:?}", e);
+
+        if let lalrpop_util::ParseError::InvalidToken { location } = e {
+            println!("Invalid token at location: {}", location);
+            
+            // Split serialized tokens string by whitespace to access individual tokens
+            let tokens: Vec<&str> = serialized_tokens.split_whitespace().collect();
+
+            // Print the problematic token directly from the serialized tokens string
+            let problematic_token_index = location; // This is where the error occurred
+            let problematic_token = tokens.get(problematic_token_index).unwrap_or(&"Unknown token");
+
+            println!("Problematic token: {}", problematic_token);
+            
+            // Define how many tokens before and after to display
+            let context_range = 3; // Number of tokens to show before the problematic token
+            let start = if problematic_token_index > context_range { problematic_token_index - context_range } else { 0 };
+            let end = (problematic_token_index + 1).min(tokens.len()); // Include the problematic token itself
+
+            // Print context around the problematic token
+            println!("Context around the problematic token:");
+            for (i, token) in tokens.iter().enumerate().take(end).skip(start) {
+                if i == problematic_token_index {
+                    println!("--> Problematic token: {}", token);
+                } else {
+                    println!("    Token {}: {}", i, token);
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+    
     println!();
 }

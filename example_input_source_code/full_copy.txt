@@ -1,0 +1,7 @@
+region DataManagement {
+    // Allocate a block of memory of customizable size
+    function allocate(size) {
+        
+
+    }
+}
