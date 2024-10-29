@@ -1,6 +1,6 @@
 grammar;
 
-use crate::grammar_ast::{Region, Function, Variable};
+use crate::grammar_ast::{Region, Function, Variable, Statement, Expr};
 
 // Define the top-level structure with a region containing functions
 pub Region: Region = {
@@ -8,44 +8,52 @@ pub Region: Region = {
         Region { name, functions }
 };
 
-// Define a function with a parameter list and an empty body
+// Define a function with a parameter list and a body
 Function: Function = {
-    "<Keyword, function>" <name:Identifier> "<Lpar, (>" <params:Parameters> "<Rpar, )>" "<Lcur, {>" "<Rcur, }>" =>
-        Function {
-            name,
-            params,
-            body: Vec::new(), // Empty body placeholder
-        }
+    "<Keyword, function>" <name:Identifier> "<Lpar, (>" <params:Parameters> "<Rpar, )>" "<Lcur, {>" <body:StmtList> "<Rcur, }>" =>
+        Function { name, params, body }
 };
 
-// Define a parameter list allowing multiple parameters separated by commas
-ParameterList: Vec<Variable> = CommaSeparated<Parameter>;
+// Define parameters as a comma-separated list
+Parameters: Vec<Variable> = {
+    => Vec::new(),
+    
+    <param:Parameter> => vec![param],
+    
+    <mut params:Parameters> "<Comma, ,>" <param:Parameter> => {
+        params.push(param);
+        params
+    }
+};
 
 // Define a single parameter
 Parameter: Variable = {
     <name:Identifier> => Variable {
         name,
-        var_type: crate::grammar_ast::Type::Int32 // Default type
+        var_type: crate::grammar_ast::Type::Int32
     }
 };
 
-//Define parameters as comma-separated comma list
-Parameters: Vec<Variable> = {
-    => Vec::new(),
+// Statement list with proper handling of empty bodies
+StmtList: Vec<Statement> = {
+    <statements:(<Stmt>)+> => statements,  // Requires at least one Stmt
+    => Vec::new(),  // Allows for an empty StmtList
+};
 
-    //single params
-    <param:Parameter> => vec![param],
 
-    <mut params:Parameters> "<Comma, ,>" <param:Parameter> => {
-        params.push(param);
-        params
-    }
-}
+// Individual statement
+Stmt: Statement = {
+    "<Keyword, return>" <expr:Expr> "<Semi, ;>" => Statement::Return(expr),
+   
+    // Add other statement types here
+};
+
+// Define an expression
+Expr: Expr = {
+    r"<Number, [0-9]+>" => Expr::Number(<>.parse().unwrap()),
+    r#"<StringLiteral, "([^"]*)">"# => Expr::StringLiteral(<>.to_string()),
+    <name:Identifier> => Expr::Variable(name),
+};
 
 // Match identifiers generically
 Identifier: String = r"<Identifier, [a-zA-Z_][a-zA-Z0-9_]*>" => <>.to_string();
-
-// Simplified comma-separated list rule for flexibility
-CommaSeparated<T>: Vec<T> = {
-    T+ => <>.into_iter().collect(),
-};

@@ -24,6 +24,8 @@ pub enum Statement {
     Call(String, Vec<Expr>),             // Function call
     If(Expr, Vec<Statement>),            // if condition
     ForLoop(Expr, Expr, Vec<Statement>), // For loop (simplified for now)
+    Empty,
+    
 }
 
 #[derive(Debug)]

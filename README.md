@@ -1,11 +1,7 @@
-# Names and UNIs of teammates
-
-- Ifesi Onubogu (io2249)
-- Giorgio Cavicchioli (gc3137)
 
 # Lexical grammar
 
-Here are the different types of tokens in our language, in regex form:
+Here are the different types of tokens in my pet language, in regex form:
 
 * **Identifier:** `[a-zA-Z][a-zA-Z0-9]*`
 * **Number:** `-?[0-9]+(.[0-9]+)?`
@@ -20,7 +16,7 @@ Here are the different types of tokens in our language, in regex form:
 
 # How to run the tokeniser
 
-Our program is written in Rust. We provide two ways to run it, either using the Rust compiler, or using Docker.
+my pet program is written in Rust. We provide two ways to run it, either using the Rust compiler, or using Docker.
 
 We also provide 6 example programs to try it on in the `example_input_source_code/` folder, each showcasing different features of our language and how the tokeniser handles them. Additionally, the `error.txt` file showcases a scenario where it will fail to tokenise.
 
