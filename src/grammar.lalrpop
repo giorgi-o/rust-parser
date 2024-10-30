@@ -1,85 +1,114 @@
 grammar;
 
-use crate::grammar_ast::{Region, Function, Variable, Statement, Expr};
+use crate::grammar_ast::{Region, Function, Variable, Statement, Expr, BinaryOp, Type};
 
-// Define the top-level structure with a region containing functions
 pub Region: Region = {
     "<Keyword, region>" <name:Identifier> "<Lcur, {>" <functions:Function+> "<Rcur, }>" =>
         Region { name, functions }
 };
 
-// Define a function with a parameter list and a body
 Function: Function = {
     "<Keyword, function>" <name:Identifier> "<Lpar, (>" <params:Parameters> "<Rpar, )>" "<Lcur, {>" <body:StmtList> "<Rcur, }>" =>
         Function { name, params, body }
 };
 
-// Define parameters as a comma-separated list
 Parameters: Vec<Variable> = {
     => Vec::new(),
-    
     <param:Parameter> => vec![param],
-    
     <mut params:Parameters> "<Comma, ,>" <param:Parameter> => {
         params.push(param);
         params
     }
 };
 
-// Define a single parameter
 Parameter: Variable = {
     <name:Identifier> => Variable {
         name,
-        var_type: crate::grammar_ast::Type::Int32
+        var_type: Type::Int32
     }
 };
 
-// Statement list with proper handling of empty bodies
 StmtList: Vec<Statement> = {
-    <statements:(<Stmt>)+> => statements,  // Requires at least one Stmt
-    => Vec::new(),  // Allows for an empty StmtList
+    <statements:Stmt*> => statements,
 };
 
-
-// Individual statement
 Stmt: Statement = {
+    "<Keyword, if>" <condition:Expr> "<Lcur, {>" <if_body:StmtList> "<Rcur, }>" =>  
+        Statement::If(condition, if_body),
+        
+    "<Keyword, for>" "<Lpar, (>" "<Keyword, let>" <init_var:Identifier> "<Operator, =>" <init_val:Expr> "<Semi, ;>" 
+        <condition:Expr> "<Semi, ;>" 
+        <update_var:Identifier> "<Operator, =>" <update_val:Expr> "<Rpar, )>" 
+        "<Lcur, {>" <body:StmtList> "<Rcur, }>" =>
+        Statement::ForLoop(
+            Box::new(Statement::Let(init_var, init_val)),
+            condition,
+            Box::new(Statement::Assignment(update_var, update_val)),
+            body
+        ),
 
-    "<Keyword, return>" <expr:Expr> "<Semi, ;>" => Statement::Return(expr),
-    "<Keyword, let>" <name:Identifier> "<Operator, =>" <expr:Expr> "<Semi, ;>" => Statement::Let(name, expr),
-    <expr:Expr> "<Semi, ;>" => Statement::Experssion(expr)
-
-   
-    // Add other statement types here
+    "<Keyword, return>" <expr:Expr> "<Semi, ;>" => 
+        Statement::Return(expr),
+    "<Keyword, let>" <name:Identifier> "<Operator, =>" <expr:Expr> "<Semi, ;>" => 
+        Statement::Let(name, expr),
+    <name:Identifier> "<Operator, =>" <expr:Expr> "<Semi, ;>" => 
+        Statement::Assignment(name, expr),
+    <expr:Expr> "<Semi, ;>" => 
+        Statement::Expression(expr),
 };
 
-
-// Define an expression
-Expr: Expr = {
-
-    Number => Expr::Number(<>),
-
-  
-
-   // r"<Number, ([0-9]+)>" => Expr::Number(<>.parse().unwrap()),
-
-    r#"<StringLiteral, "([^"]*)">"# => Expr::StringLiteral(<>.to_string()),
-    
-    <name:Identifier> "<Lpar, (>" <args:ExprList> "<Rpar, )>" => Expr::Call(name, args),
-
-    <name:Identifier> => Expr::Variable(name),
+// Expression precedence hierarchy
+Expr: Box<Expr> = {
+    AddExpr
 };
 
-condition: 
+AddExpr: Box<Expr> = {
+    <l:AddExpr> "<Operator, +>" <r:CmpExpr> => Box::new(Expr::Binary(l, BinaryOp::Add, r)),
+    CmpExpr
+};
 
-ExprList: Vec<Expr> = {
+CmpExpr: Box<Expr> = {
+    <l:CmpExpr> "<Operator, <>" <r:Term> => Box::new(Expr::Binary(l, BinaryOp::LessThan, r)),
+    Term
+};
+
+Term: Box<Expr> = {
+    DotExpr
+};
+
+DotExpr: Box<Expr> = {
+    <e:DotExpr> "<Dot, .>" <name:Identifier> "<Lpar, (>" <args:ExprList> "<Rpar, )>" => 
+        Box::new(Expr::MethodCall(e, name, args)),
+    Factor
+};
+
+Factor: Box<Expr> = {
+    Number => Box::new(Expr::Number(<>)),
+    r#"<StringLiteral, "([^"]*)">"# => Box::new(Expr::StringLiteral(<>.to_string())),
+    "<Lbrack, [>" "<Rbrack, ]>" => Box::new(Expr::Array(Vec::new())),
+    "<Lbrack, [>" <elements:ArrayElements> "<Rbrack, ]>" => Box::new(Expr::Array(elements)),
+    <name:Identifier> "<Lpar, (>" <args:ExprList> "<Rpar, )>" => Box::new(Expr::Call(name, args)),
+    <name:Identifier> => Box::new(Expr::Variable(name)),
+    "<Lpar, (>" <e:Expr> "<Rpar, )>" => e,
+};
+
+ArrayElements: Vec<Box<Expr>> = {
+    <expr:Expr> => vec![expr],
+    <mut v:ArrayElements> "<Comma, ,>" <e:Expr> => {
+        v.push(e);
+        v
+    }
+};
+
+ExprList: Vec<Box<Expr>> = {
     => Vec::new(),
     <expr:Expr> => vec![expr],
     <mut exprs:ExprList> "<Comma, ,>" <expr:Expr> => {
-      exprs.push(expr);
-      exprs
+        exprs.push(expr);
+        exprs
     }
-  }
-// Match identifiers generically
+};
+
 Identifier: String = r"<Identifier, [a-zA-Z_][a-zA-Z0-9_]*>" => <>.to_string();
 
 Number: i32 = {

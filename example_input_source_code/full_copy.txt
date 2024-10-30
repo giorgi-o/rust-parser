@@ -1,18 +1,34 @@
 region DataManagement {
     // Allocate a block of memory of customizable size
     function allocate(size) {
-
-       let buffer = allocateMemory(size); 
+   
+        let buffer = allocateMemory(size);
         return buffer;
     }
      function free(ptr) {
-        
         freeMemory(ptr);
          return 10;
       
     }
    function processStream( streamSize, streamSize) {
-      
+       if isMemoryFreed(ptr) {
+            return 0;   // Error if trying to use freed memory
+        }
+        let streamPtr = allocate(streamSize); 
+    }
+
+     // A customizable function to allocate and use a block of memory
+    function processStream(streamSize ) { //NOTE: WE ONLY TKAE ONE PARAMTER
+        blocksize = 10;
+        let streamPtr = allocate(streamSize);   // Allocate memory for the stream
+        let blocks = [];   // Create an empty list to store block pointers
+
+        // Divide the stream into blocks and process them
+        for (let i = 0; i < streamSize; i = i + blockSize) {
+            let blockPtr = borrow(streamPtr + i);   // Borrow part of the memory
+            blocks.push(blockPtr);   // Process and store the block pointer
+        }
+        return blocks;
     }
   
 }

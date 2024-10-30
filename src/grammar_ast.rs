@@ -19,22 +19,31 @@ pub struct Variable {
 
 #[derive(Debug)]
 pub enum Statement {
-    Let(String, Expr),                   // let buffer = allocateMemory(size);
-    Return(Expr),                        // return buffer;
-    Call(String, Vec<Expr>),             // Function call
-    If(Expr, Vec<Statement>),            // if condition
-    ForLoop(Expr, Expr, Vec<Statement>), // For loop (simplified for now)
-    Empty,
-    Experssion(Expr),
-    
+    Let(String, Box<Expr>),
+    Return(Box<Expr>),
+    Expression(Box<Expr>),
+    Call(String, Vec<Box<Expr>>),
+    If(Box<Expr>, Vec<Statement>),
+    ForLoop(Box<Statement>, Box<Expr>, Box<Statement>, Vec<Statement>),
+    Assignment(String, Box<Expr>),
 }
 
 #[derive(Debug)]
 pub enum Expr {
-    Number(i32),             // Integer literals
-    StringLiteral(String),   // String literals
-    Variable(String),        // Variable references
-    Call(String, Vec<Expr>), // Function call as an expression
+    Number(i32),
+    StringLiteral(String),
+    Variable(String),
+    Call(String, Vec<Box<Expr>>),
+    Array(Vec<Box<Expr>>),
+    Binary(Box<Expr>, BinaryOp, Box<Expr>),
+    MethodCall(Box<Expr>, String, Vec<Box<Expr>>),
+}
+
+#[derive(Debug)]
+pub enum BinaryOp {
+    Add,
+    LessThan,
+    // Add other operators as needed
 }
 
 #[derive(Debug)]
