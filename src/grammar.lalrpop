@@ -43,17 +43,45 @@ StmtList: Vec<Statement> = {
 
 // Individual statement
 Stmt: Statement = {
+
     "<Keyword, return>" <expr:Expr> "<Semi, ;>" => Statement::Return(expr),
+    "<Keyword, let>" <name:Identifier> "<Operator, =>" <expr:Expr> "<Semi, ;>" => Statement::Let(name, expr),
+    <expr:Expr> "<Semi, ;>" => Statement::Experssion(expr)
+
    
     // Add other statement types here
 };
 
+
 // Define an expression
 Expr: Expr = {
-    r"<Number, [0-9]+>" => Expr::Number(<>.parse().unwrap()),
+
+    Number => Expr::Number(<>),
+
+  
+
+   // r"<Number, ([0-9]+)>" => Expr::Number(<>.parse().unwrap()),
+
     r#"<StringLiteral, "([^"]*)">"# => Expr::StringLiteral(<>.to_string()),
+    
+    <name:Identifier> "<Lpar, (>" <args:ExprList> "<Rpar, )>" => Expr::Call(name, args),
+
     <name:Identifier> => Expr::Variable(name),
 };
 
+condition: 
+
+ExprList: Vec<Expr> = {
+    => Vec::new(),
+    <expr:Expr> => vec![expr],
+    <mut exprs:ExprList> "<Comma, ,>" <expr:Expr> => {
+      exprs.push(expr);
+      exprs
+    }
+  }
 // Match identifiers generically
 Identifier: String = r"<Identifier, [a-zA-Z_][a-zA-Z0-9_]*>" => <>.to_string();
+
+Number: i32 = {
+    r"<Number, ([0-9]+)>" => <>.split(',').nth(1).unwrap().trim().trim_end_matches('>').parse().unwrap()
+};

@@ -25,6 +25,7 @@ pub enum Statement {
     If(Expr, Vec<Statement>),            // if condition
     ForLoop(Expr, Expr, Vec<Statement>), // For loop (simplified for now)
     Empty,
+    Experssion(Expr),
     
 }
 
