@@ -5,4 +5,4 @@ region TradingData {
     // Do some work with temp_buffer
     free(buffer);  // Explicitly free buffer
 
-}  // When the region ends, all remaining memory is cleaned up
+} 

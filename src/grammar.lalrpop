@@ -1,12 +1,26 @@
 grammar;
 
-use crate::grammar_ast::{Region, Function, Variable, Statement, Expr, BinaryOp, Type};
-
-pub Region: Region = {
-    "<Keyword, region>" <name:Identifier> "<Lcur, {>" <functions:Function+> "<Rcur, }>" =>
-        Region { name, functions }
+use crate::grammar_ast::{Region, Function, Variable, Statement, Expr, BinaryOp, Type, RegionItem};
+pub Program: Vec<Region> = {
+    <region:Region> => vec![region],
+    <mut v:Program> <region:Region> => {
+        v.push(region);
+        v
+    }
 };
 
+pub Region: Region = {
+    "<Keyword, region>" <name:Identifier> "<Lcur, {>" <body:RegionBody> "<Rcur, }>" =>
+        Region { name, body }
+};
+
+RegionBody: Vec<RegionItem> = {
+    <items:RegionItem*> => items
+};
+RegionItem: RegionItem = {
+    <func:Function> => RegionItem::Function(func),
+    <stmt:Stmt> => RegionItem::Statement(stmt),
+};
 Function: Function = {
     "<Keyword, function>" <name:Identifier> "<Lpar, (>" <params:Parameters> "<Rpar, )>" "<Lcur, {>" <body:StmtList> "<Rcur, }>" =>
         Function { name, params, body }
@@ -33,6 +47,12 @@ StmtList: Vec<Statement> = {
 };
 
 Stmt: Statement = {
+    // If-else statement
+    "<Keyword, if>" <condition:Expr> "<Lcur, {>" <if_body:StmtList> "<Rcur, }>" 
+    "<Keyword, else>" "<Lcur, {>" <else_body:StmtList> "<Rcur, }>" =>  
+        Statement::IfElse(condition, if_body, else_body),
+
+    // Regular if statement    
     "<Keyword, if>" <condition:Expr> "<Lcur, {>" <if_body:StmtList> "<Rcur, }>" =>  
         Statement::If(condition, if_body),
         
@@ -49,6 +69,12 @@ Stmt: Statement = {
 
     "<Keyword, return>" <expr:Expr> "<Semi, ;>" => 
         Statement::Return(expr),
+
+    // Uninitialized variable declaration
+    "<Keyword, let>" <name:Identifier> "<Semi, ;>" => 
+        Statement::Let(name, Box::new(Expr::Uninitialized)),
+
+    // Regular variable declaration    
     "<Keyword, let>" <name:Identifier> "<Operator, =>" <expr:Expr> "<Semi, ;>" => 
         Statement::Let(name, expr),
     <name:Identifier> "<Operator, =>" <expr:Expr> "<Semi, ;>" => 
@@ -112,5 +138,5 @@ ExprList: Vec<Box<Expr>> = {
 Identifier: String = r"<Identifier, [a-zA-Z_][a-zA-Z0-9_]*>" => <>.to_string();
 
 Number: i32 = {
-    r"<Number, ([0-9]+)>" => <>.split(',').nth(1).unwrap().trim().trim_end_matches('>').parse().unwrap()
+    r"<Number, (-?[0-9]+)>" => <>.split(',').nth(1).unwrap().trim().trim_end_matches('>').parse().unwrap()
 };

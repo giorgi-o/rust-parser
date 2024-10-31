@@ -1,8 +1,15 @@
 #[derive(Debug)]
 pub struct Region {
     pub name: String,
-    pub functions: Vec<Function>,
+    pub body: Vec<RegionItem>,
 }
+
+#[derive(Debug)]
+pub enum RegionItem {
+    Function(Function),
+    Statement(Statement),
+}
+
 
 #[derive(Debug)]
 pub struct Function {
@@ -24,12 +31,14 @@ pub enum Statement {
     Expression(Box<Expr>),
     Call(String, Vec<Box<Expr>>),
     If(Box<Expr>, Vec<Statement>),
+    IfElse(Box<Expr>, Vec<Statement>, Vec<Statement>),  // Added
     ForLoop(Box<Statement>, Box<Expr>, Box<Statement>, Vec<Statement>),
     Assignment(String, Box<Expr>),
 }
 
 #[derive(Debug)]
 pub enum Expr {
+    Uninitialized,  // Added
     Number(i32),
     StringLiteral(String),
     Variable(String),
