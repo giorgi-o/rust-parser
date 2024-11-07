@@ -1,2 +1,2 @@
-docker build --tag plattr-tokeniser .
-docker run plattr-tokeniser
+docker build --tag plattr-parser .
+docker run plattr-parser

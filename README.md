@@ -3,26 +3,61 @@
 - Ifesi Onubogu (io2249)
 - Giorgio Cavicchioli (gc3137)
 
-# Lexical grammar
+# 1. Language Grammar
 
-Here are the different types of tokens in our language, in regex form:
+Here is the CFG for our language:
 
-* **Identifier:** `[a-zA-Z][a-zA-Z0-9]*`
-* **Number:** `-?[0-9]+(.[0-9]+)?`
-* **Keyword:** `region|let|function|return|if|else|for`
-* **Operator:** `+|-|*|/|=|<|>|<=|>=`
-* **Lcur, Rcur:** `{`, `}`
-* **Lpar, Rpar:** `(`, `)`
-* **Lbrack, Rbrack:** `[`, `]`
-* **Semi:** `;`
-* **Comma:** `,`
-* **Dot:** `.`
+```plaintext
+Program ::= Region | Program Region
 
-# How to run the tokeniser
+Region ::= "region" Identifier "{" RegionBody "}"
 
-Our program is written in Rust. We provide two ways to run it, either using the Rust compiler, or using Docker.
+RegionBody ::= RegionItem*
+RegionItem ::= Function | Stmt
 
-We also provide 6 example programs to try it on in the `example_input_source_code/` folder, each showcasing different features of our language and how the tokeniser handles them. Additionally, the `error.txt` file showcases a scenario where it will fail to tokenise.
+Function ::= "function" Identifier "(" Parameters ")" "{" StmtList "}"
+
+Parameters ::= ε | Parameter | Parameters "," Parameter
+Parameter ::= Identifier
+
+StmtList ::= Stmt*
+
+Stmt ::= "if" Expr "{" StmtList "}" "else" "{" StmtList "}"
+       | "if" Expr "{" StmtList "}"
+       | "for" "(" "let" Identifier "=" Expr ";" Expr ";" Identifier "=" Expr ")" "{" StmtList "}"
+       | "return" Expr ";"
+       | "let" Identifier ";"
+       | "let" Identifier "=" Expr ";"
+       | Identifier "=" Expr ";"
+       | Expr ";"
+
+Expr ::= AddExpr
+AddExpr ::= AddExpr "+" CmpExpr | CmpExpr
+CmpExpr ::= CmpExpr "<" Term | Term
+Term ::= DotExpr
+DotExpr ::= DotExpr "." Identifier "(" ExprList ")" | Factor
+
+Factor ::= Number 
+        | StringLiteral 
+        | "[" "]" 
+        | "[" ArrayElements "]"
+        | Identifier "(" ExprList ")"
+        | Identifier
+        | "(" Expr ")"
+
+ArrayElements ::= Expr | ArrayElements "," Expr
+ExprList ::= ε | Expr | ExprList "," Expr
+
+Identifier ::= [a-zA-Z_][a-zA-Z0-9_]*
+Number ::= -?[0-9]+
+StringLiteral ::= "[^"]*"
+```
+
+# 2. Parsing algorithm
+
+We use the [Larlpop](https://github.com/nikomatsakis/lalrpop) library (pronounced "lollipop"), which is a library implementation of an LR(1) parser, using the CFG above as input (defined in `src/grammar.larlpop`), and emitting Rust code as output.
+
+We provide 2 ways of running our parser: using Rust/Cargo, and using Docker. Both methods are described below.
 
 ## Using Rust/Cargo
 
@@ -32,7 +67,7 @@ Once installed, simply run `cargo run -- example_input_source_code/[file].txt`. 
 
 ## Using Docker
 
-A dockerfile is provided to run our tokeniser in a docker container. To use it, first open the `Dockerfile` file and change which example source code to run it on:
+A dockerfile is provided to run our parser in a docker container. To use it, first open the `Dockerfile` file and change which example source code to run it on:
 
 ```dockerfile
 # Run the specified Rust file
@@ -42,35 +77,12 @@ CMD ["cargo", "run", "--", "example_input_source_code/full.txt"] # <- change thi
 Then, to build and run the container:
 
 ```bash
-docker build --tag plattr-tokeniser .
-docker run plattr-tokeniser
+docker build --tag plattr-parser .
+docker run plattr-parser
 ```
 
 These two commands are also provided in the `run.sh` script.
 
-# Example output
+# 3. Sample input programs
 
-Example for a successful tokenisation:
-
-```bash
-$ cargo run -- example_input_source_code/full.txt
-# ... a bunch of other output
-
-3. Tokens:
-<Keyword, region> <Identifier, DataManagement> <Lcur, {> <Keyword, function> <Identifier, allocate> <Lpar, (> <Identifier, size> <Rpar, )> <Lcur, {> <Keyword, let> <Identifier, buffer> <Operator, => <Identifier, allocateMemory> <Lpar, (> <Identifier, size> <Rpar, )> <Semi, ;> <Keyword, return> <Identifier, buffer> <Semi, ;> <Rcur, }> <Keyword, function> <Identifier, free> <Lpar, (> <Identifier, ptr> <Rpar, )> <Lcur, {> <Identifier, freeMemory> <Lpar, (> <Identifier, ptr> <Rpar, )> <Semi, ;> <Keyword, return> <Number, 0> <Semi, ;> <Rcur, }> <Keyword, function> <Identifier, borrow> <Lpar, (> <Identifier, ptr> <Rpar, )> <Lcur, {> <Keyword, if> <Identifier, isMemoryFreed> <Lpar, (> <Identifier, ptr> <Rpar, )> <Lcur, {> <Keyword, return> <Number, 1> <Semi, ;> <Rcur, }> <Keyword, return> <Identifier, ptr> <Semi, ;> <Rcur, }> <Keyword, function> <Identifier, processStream> <Lpar, (> <Identifier, streamSize> <Comma, ,> <Identifier, blocksize> <Rpar, )> <Lcur, {> <Keyword, let> <Identifier, streamPtr> <Operator, => <Identifier, allocate> <Lpar, (> <Identifier, streamSize> <Rpar, )> <Semi, ;> <Keyword, let> <Identifier, blocks> <Operator, => <Lbrack, [> <Rbrack, ]> <Semi, ;> <Keyword, for> <Lpar, (> <Keyword, let> <Identifier, i> <Operator, => <Number, 0> <Semi, ;> <Identifier, i> <Operator, <> <Identifier, streamSize> <Semi, ;> <Identifier, i> <Operator, => <Identifier, i> <Operator, +> <Identifier, blockSize> <Rpar, )> <Lcur, {> <Keyword, let> <Identifier, blockPtr> <Operator, => <Identifier, borrow> <Lpar, (> <Identifier, streamPtr> <Operator, +> <Identifier, i> <Rpar, )> <Semi, ;> <Identifier, blocks> <Dot, .> <Identifier, push> <Lpar, (> <Identifier, blockPtr> <Rpar, )> <Semi, ;> <Rcur, }> <Keyword, return> <Identifier, blocks> <Semi, ;> <Rcur, }> <Rcur, }>
-```
-
-Example for a failed tokenisation:
-
-```bash
-$ cargo run -- example_input_source_code/error.txt
-# ... a bunch of other output
-
-Error parsing file example_input_source_code/error.txt:2:13 while parsing token: 123a
-```
-
-# Overview of the code
-
-`src/main.rs` is the program's entry point. It contains the definition of the `Token`, `Keyword` and `Operator` enums. The actual `main()` function (line 126) first does some minor pre-processing (removing comments), then calls `Tokeniser::tokenise()` and prints the output.
-
-`src/token_fsm.rs` contains the FSM logic for the tokeniser. The file is very thoroughly commented and should be easy to follow.
+We provide several sample input programs in the `example_input_source_code` directory, along with their matching AST outputs in `example_output_source_code`.
