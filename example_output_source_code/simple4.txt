@@ -1,1 +1,90 @@
-<Keyword, region> <Identifier, ExampleRegion> <Lcur, {> <Keyword, function> <Identifier, foo> <Lpar, (> <Identifier, big> <Rpar, )> <Lcur, {> <Keyword, let> <Identifier, count> <Operator, => <Number, 10> <Semi, ;> <Keyword, let> <Identifier, arr> <Operator, => <Lbrack, [> <Rbrack, ]> <Semi, ;> <Keyword, for> <Lpar, (> <Keyword, let> <Identifier, i> <Operator, => <Number, 0> <Semi, ;> <Identifier, i> <Operator, <> <Identifier, count> <Semi, ;> <Identifier, i> <Operator, => <Identifier, i> <Operator, +> <Number, 1> <Rpar, )> <Lcur, {> <Keyword, let> <Identifier, buffer> <Operator, => <Identifier, allocateMemory> <Lpar, (> <Number, 1024> <Rpar, )> <Semi, ;> <Identifier, arr> <Dot, .> <Identifier, push> <Lpar, (> <Identifier, buffer> <Rpar, )> <Semi, ;> <Rcur, }> <Keyword, return> <Identifier, arr> <Semi, ;> <Rcur, }> <Rcur, }>
+Parsed AST: Region {
+    name: "<Identifier, ExampleRegion>",
+    body: [
+        Function(
+            Function {
+                name: "<Identifier, foo>",
+                params: [
+                    Variable {
+                        name: "<Identifier, big>",
+                        var_type: Int32,
+                    },
+                ],
+                body: [
+                    Let(
+                        "<Identifier, count>",
+                        Number(
+                            10,
+                        ),
+                    ),
+                    Let(
+                        "<Identifier, arr>",
+                        Array(
+                            [],
+                        ),
+                    ),
+                    ForLoop(
+                        Let(
+                            "<Identifier, i>",
+                            Number(
+                                0,
+                            ),
+                        ),
+                        Binary(
+                            Variable(
+                                "<Identifier, i>",
+                            ),
+                            LessThan,
+                            Variable(
+                                "<Identifier, count>",
+                            ),
+                        ),
+                        Assignment(
+                            "<Identifier, i>",
+                            Binary(
+                                Variable(
+                                    "<Identifier, i>",
+                                ),
+                                Add,
+                                Number(
+                                    1,
+                                ),
+                            ),
+                        ),
+                        [
+                            Let(
+                                "<Identifier, buffer>",
+                                Call(
+                                    "<Identifier, allocateMemory>",
+                                    [
+                                        Number(
+                                            1024,
+                                        ),
+                                    ],
+                                ),
+                            ),
+                            Expression(
+                                MethodCall(
+                                    Variable(
+                                        "<Identifier, arr>",
+                                    ),
+                                    "<Identifier, push>",
+                                    [
+                                        Variable(
+                                            "<Identifier, buffer>",
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ],
+                    ),
+                    Return(
+                        Variable(
+                            "<Identifier, arr>",
+                        ),
+                    ),
+                ],
+            },
+        ),
+    ],
+}

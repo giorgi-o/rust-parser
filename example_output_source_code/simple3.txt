@@ -1,1 +1,53 @@
-<Keyword, region> <Identifier, ExampleRegion> <Lcur, {> <Keyword, function> <Identifier, foo> <Lpar, (> <Identifier, big> <Rpar, )> <Lcur, {> <Keyword, let> <Identifier, buffer> <Semi, ;> <Keyword, if> <Lpar, (> <Identifier, big> <Rpar, )> <Lcur, {> <Identifier, buffer> <Operator, => <Identifier, allocateMemory> <Lpar, (> <Number, 1024> <Rpar, )> <Semi, ;> <Rcur, }> <Keyword, else> <Lcur, {> <Identifier, buffer> <Operator, => <Identifier, allocateMemory> <Lpar, (> <Number, 128> <Rpar, )> <Semi, ;> <Rcur, }> <Rcur, }> <Rcur, }>
+Parsed AST: Region {
+    name: "<Identifier, ExampleRegion>",
+    body: [
+        Function(
+            Function {
+                name: "<Identifier, foo>",
+                params: [
+                    Variable {
+                        name: "<Identifier, big>",
+                        var_type: Int32,
+                    },
+                ],
+                body: [
+                    Let(
+                        "<Identifier, buffer>",
+                        Uninitialized,
+                    ),
+                    IfElse(
+                        Variable(
+                            "<Identifier, big>",
+                        ),
+                        [
+                            Assignment(
+                                "<Identifier, buffer>",
+                                Call(
+                                    "<Identifier, allocateMemory>",
+                                    [
+                                        Number(
+                                            1024,
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ],
+                        [
+                            Assignment(
+                                "<Identifier, buffer>",
+                                Call(
+                                    "<Identifier, allocateMemory>",
+                                    [
+                                        Number(
+                                            128,
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ],
+                    ),
+                ],
+            },
+        ),
+    ],
+}

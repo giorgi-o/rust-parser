@@ -1,1 +1,43 @@
-<Keyword, region> <Identifier, TradingData> <Lcur, {> <Keyword, let> <Identifier, buffer> <Operator, => <Identifier, allocate> <Lpar, (> <Number, 1024> <Rpar, )> <Semi, ;> <Keyword, let> <Identifier, tempBuffer> <Operator, => <Identifier, borrow> <Lpar, (> <Identifier, buffer> <Rpar, )> <Semi, ;> <Identifier, free> <Lpar, (> <Identifier, buffer> <Rpar, )> <Semi, ;> <Rcur, }>
+Parsed AST: Region {
+    name: "<Identifier, TradingData>",
+    body: [
+        Statement(
+            Let(
+                "<Identifier, buffer>",
+                Call(
+                    "<Identifier, allocate>",
+                    [
+                        Number(
+                            1024,
+                        ),
+                    ],
+                ),
+            ),
+        ),
+        Statement(
+            Let(
+                "<Identifier, tempBuffer>",
+                Call(
+                    "<Identifier, borrow>",
+                    [
+                        Variable(
+                            "<Identifier, buffer>",
+                        ),
+                    ],
+                ),
+            ),
+        ),
+        Statement(
+            Expression(
+                Call(
+                    "<Identifier, free>",
+                    [
+                        Variable(
+                            "<Identifier, buffer>",
+                        ),
+                    ],
+                ),
+            ),
+        ),
+    ],
+}

@@ -1,6 +1,3 @@
 region ExampleRegion {
-    let 123abc = 1; // error: identifier can't start with a number
-
-    // the tokeniser will print the file, line and column where the error
-    // took place
+    region ExampleInnerRegion {} // error: regions can't be nested!
 }

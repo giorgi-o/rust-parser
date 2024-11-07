@@ -1,25 +1,25 @@
 region DataManagement {
     // Allocate a block of memory of customizable size
     function allocate(size) {
-        let buffer = allocateMemory(size);   // Allocate memory of 'size' bytes
+   
+        let buffer = allocateMemory(size);
         return buffer;
     }
-    // Free a memory block given a pointer
-    function free(ptr) {
-        freeMemory(ptr);   // Deallocate the memory at 'ptr'
-        return 0;
+     function free(ptr) {
+        freeMemory(ptr);
+         return 10;
+      
     }
-    // Borrow a memory block if it hasn't been freed
-    function borrow(ptr) {
-        if isMemoryFreed(ptr) {
-            return -1;   // Error if trying to use freed memory
+   function processStream( streamSize, streamSize) {
+       if isMemoryFreed(ptr) {
+            return 0;   // Error if trying to use freed memory
         }
-        return ptr;   // Otherwise return the pointer
+        let streamPtr = allocate(streamSize); 
     }
 
-    // A customizable function to allocate and use a block of memory
+     // A customizable function to allocate and use a block of memory
     function processStream(streamSize ) { //NOTE: WE ONLY TKAE ONE PARAMTER
-        blocksize= 10
+        blocksize = 10;
         let streamPtr = allocate(streamSize);   // Allocate memory for the stream
         let blocks = [];   // Create an empty list to store block pointers
 
@@ -30,4 +30,5 @@ region DataManagement {
         }
         return blocks;
     }
+  
 }
