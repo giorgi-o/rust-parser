@@ -86,3 +86,8 @@ These two commands are also provided in the `run.sh` script.
 # 3. Sample input programs
 
 We provide several sample input programs in the `example_input_source_code` directory, along with their matching AST outputs in `example_output_source_code`.
+
+
+# 6. Demo Video
+
+https://github.com/user-attachments/assets/e08b7f1e-6681-47a9-82f0-68f72ffcae95
