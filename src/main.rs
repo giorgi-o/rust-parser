@@ -1,12 +1,8 @@
-
-
 mod grammar_ast;
 use lalrpop_util::lalrpop_mod;
 lalrpop_mod!(grammar);
 
 use grammar::RegionParser;
-
-
 
 pub mod token_fsm;
 
@@ -173,8 +169,7 @@ fn main() {
         println!("{line}");
     }
 
-    let tokens_result =
-        Tokeniser::tokenise(&file_path, &code_without_comments);
+    let tokens_result = Tokeniser::tokenise(&file_path, &code_without_comments);
 
     let tokens = match tokens_result {
         Ok(tokens) => tokens,
@@ -187,7 +182,6 @@ fn main() {
     println!("\n3. Tokens:");
     for token in &tokens {
         print!("{} ", token.fmt_type_and_value());
-
     }
 
     let mut serialized_tokens = String::new();
@@ -198,68 +192,61 @@ fn main() {
         serialized_tokens.push_str(&token_str);
         serialized_tokens.push(' '); // Add a space between tokens
     }
-    
+
     // Trim any trailing whitespace for clean output
     serialized_tokens = serialized_tokens.trim_end().to_string();
-    
+
     // Print the serialized tokens to verify correctness
     println!("Serialized Tokens: {}", serialized_tokens);
 
-
-
-
     println!("\n4. SerializedTokens:");
-println!("Serialized Tokens: {:?}", serialized_tokens);
+    println!("Serialized Tokens: {:?}", serialized_tokens);
 
-match RegionParser::new().parse(&serialized_tokens) {
-    Ok(region) => println!("Parsed AST: {:#?}", region),
-    Err(e) => {
-        println!("Error parsing: {:?}", e);
-        println!("Full error: {:?}", e);
+    match RegionParser::new().parse(&serialized_tokens) {
+        Ok(region) => println!("Parsed AST: {:#?}", region),
+        Err(e) => {
+            println!("Error parsing: {:?}", e);
+            println!("Full error: {:?}", e);
 
-        if let lalrpop_util::ParseError::InvalidToken { location } = e {
-            println!("Invalid token at character location: {}", location);
+            if let lalrpop_util::ParseError::InvalidToken { location } = e {
+                println!("Invalid token at character location: {}", location);
 
-            // Split `serialized_tokens` into individual tokens
-            let tokens: Vec<&str> = serialized_tokens.split_whitespace().collect();
+                // Split `serialized_tokens` into individual tokens
+                let tokens: Vec<&str> = serialized_tokens.split_whitespace().collect();
 
-            // Convert character location to token index
-            let mut char_count = 0;
-            let problematic_token_index = tokens.iter().position(|&token| {
-                char_count += token.len() + 1; // +1 for the space separator
-                char_count > location
-            }).unwrap_or_else(|| tokens.len().saturating_sub(1));
+                // Convert character location to token index
+                let mut char_count = 0;
+                let problematic_token_index = tokens
+                    .iter()
+                    .position(|&token| {
+                        char_count += token.len() + 1; // +1 for the space separator
+                        char_count > location
+                    })
+                    .unwrap_or_else(|| tokens.len().saturating_sub(1));
 
-            // Identify the problematic token
-            let problematic_token = tokens.get(problematic_token_index).unwrap_or(&"Unknown token");
-            println!("Problematic token: {}", problematic_token);
+                // Identify the problematic token
+                let problematic_token = tokens
+                    .get(problematic_token_index)
+                    .unwrap_or(&"Unknown token");
+                println!("Problematic token: {}", problematic_token);
 
-            // Define the context range to show surrounding tokens
-            let context_range = 3;
-            let start = problematic_token_index.saturating_sub(context_range);
-            let end = (problematic_token_index + context_range + 1).min(tokens.len());
+                // Define the context range to show surrounding tokens
+                let context_range = 3;
+                let start = problematic_token_index.saturating_sub(context_range);
+                let end = (problematic_token_index + context_range + 1).min(tokens.len());
 
-            // Print context with improved formatting
-            println!("Context around the problematic token:");
-            for (i, token) in tokens.iter().enumerate().take(end).skip(start) {
-                if i == problematic_token_index {
-                    println!("--> Problematic token: {}", token);
-                } else {
-                    println!("    Token {}: {}", i, token);
+                // Print context with improved formatting
+                println!("Context around the problematic token:");
+                for (i, token) in tokens.iter().enumerate().take(end).skip(start) {
+                    if i == problematic_token_index {
+                        println!("--> Problematic token: {}", token);
+                    } else {
+                        println!("    Token {}: {}", i, token);
+                    }
                 }
             }
         }
     }
-}
 
-
-
-
-
-
-
-
-
-    
     println!();
 }

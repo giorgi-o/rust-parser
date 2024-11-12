@@ -10,7 +10,6 @@ pub enum RegionItem {
     Statement(Statement),
 }
 
-
 #[derive(Debug)]
 pub struct Function {
     pub name: String,
@@ -31,14 +30,14 @@ pub enum Statement {
     Expression(Box<Expr>),
     Call(String, Vec<Box<Expr>>),
     If(Box<Expr>, Vec<Statement>),
-    IfElse(Box<Expr>, Vec<Statement>, Vec<Statement>),  // Added
+    IfElse(Box<Expr>, Vec<Statement>, Vec<Statement>), // Added
     ForLoop(Box<Statement>, Box<Expr>, Box<Statement>, Vec<Statement>),
     Assignment(String, Box<Expr>),
 }
 
 #[derive(Debug)]
 pub enum Expr {
-    Uninitialized,  // Added
+    Uninitialized, // Added
     Number(i32),
     StringLiteral(String),
     Variable(String),
