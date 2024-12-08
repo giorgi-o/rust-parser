@@ -1,30 +1,31 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Region {
     pub name: String,
     pub body: Vec<RegionItem>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum RegionItem {
     Function(Function),
     Statement(Statement),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Function {
     pub name: String,
     pub params: Vec<Variable>, // Function parameters
     pub body: Vec<Statement>,  // Function body consisting of statements
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Variable {
     pub name: String,
     pub var_type: Type, // Variable type (Int, String, etc.)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Statement {
+    Noop,
     Let(String, Box<Expr>),
     Return(Box<Expr>),
     Expression(Box<Expr>),
@@ -35,7 +36,7 @@ pub enum Statement {
     Assignment(String, Box<Expr>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expr {
     Uninitialized, // Added
     Number(i32),
@@ -47,14 +48,14 @@ pub enum Expr {
     MethodCall(Box<Expr>, String, Vec<Box<Expr>>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BinaryOp {
     Add,
     LessThan,
     // Add other operators as needed
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Type {
     Int32,      // Integer type
     StringType, // String type

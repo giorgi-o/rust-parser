@@ -1,1 +1,3 @@
 /target
+pybind_test/.venv
+pybind_test/target
