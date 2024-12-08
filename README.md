@@ -3,61 +3,15 @@
 - Ifesi Onubogu (io2249)
 - Giorgio Cavicchioli (gc3137)
 
-# 1. Language Grammar
+# 1. Code generation algorithm
 
-Here is the CFG for our language:
+We wrote a code generation algorithm to turn the parsed AST into output Rust code. The Rust code is then compiled into a Python module using [pyo3](https://pyo3.rs/v0.23.3/) and [maturin](https://www.maturin.rs/).
 
-```plaintext
-Program ::= Region | Program Region
+We provide 6 sample programs (5 correct, 1 error) in `example_input_source_code/`, and their matching outputs are in `example_output_source_code/`. These cover all the language features supported by our language including regions, functions, if and if/else statements, for loops, dynamic typing and return statements.
 
-Region ::= "region" Identifier "{" RegionBody "}"
+The strength of using the Rust language as our compiler's output is that we ensure the output code is extremely robust and takes full advantage of all of Rust's safety guarantees, combined with C-like performance. A major challenge was that our language is dynamically typed, while Rust requires very strong type annotations due to its type system. However, our language works great and exceeded our expectations for its performance and ease of use.
 
-RegionBody ::= RegionItem*
-RegionItem ::= Function | Stmt
-
-Function ::= "function" Identifier "(" Parameters ")" "{" StmtList "}"
-
-Parameters ::= ε | Parameter | Parameters "," Parameter
-Parameter ::= Identifier
-
-StmtList ::= Stmt*
-
-Stmt ::= "if" Expr "{" StmtList "}" "else" "{" StmtList "}"
-       | "if" Expr "{" StmtList "}"
-       | "for" "(" "let" Identifier "=" Expr ";" Expr ";" Identifier "=" Expr ")" "{" StmtList "}"
-       | "return" Expr ";"
-       | "let" Identifier ";"
-       | "let" Identifier "=" Expr ";"
-       | Identifier "=" Expr ";"
-       | Expr ";"
-
-Expr ::= AddExpr
-AddExpr ::= AddExpr "+" CmpExpr | CmpExpr
-CmpExpr ::= CmpExpr "<" Term | Term
-Term ::= DotExpr
-DotExpr ::= DotExpr "." Identifier "(" ExprList ")" | Factor
-
-Factor ::= Number 
-        | StringLiteral 
-        | "[" "]" 
-        | "[" ArrayElements "]"
-        | Identifier "(" ExprList ")"
-        | Identifier
-        | "(" Expr ")"
-
-ArrayElements ::= Expr | ArrayElements "," Expr
-ExprList ::= ε | Expr | ExprList "," Expr
-
-Identifier ::= [a-zA-Z_][a-zA-Z0-9_]*
-Number ::= -?[0-9]+
-StringLiteral ::= "[^"]*"
-```
-
-# 2. Parsing algorithm
-
-We use the [Larlpop](https://github.com/nikomatsakis/lalrpop) library (pronounced "lollipop"), which is a library implementation of an LR(1) parser, using the CFG above as input (defined in `src/grammar.larlpop`), and emitting Rust code as output.
-
-We provide 2 ways of running our parser: using Rust/Cargo, and using Docker. Both methods are described below.
+We provide 2 ways of running our compiler: using Rust/Cargo, and using Docker. Both methods are described below.
 
 ## Using Rust/Cargo
 
@@ -83,11 +37,12 @@ docker run plattr-parser
 
 These two commands are also provided in the `run.sh` script.
 
-# 3. Sample input programs
+# 2. Sample input programs
 
-We provide several sample input programs in the `example_input_source_code` directory, along with their matching AST outputs in `example_output_source_code`.
+We provide several sample input programs in the `example_input_source_code` directory, along with their matching generated code in `example_output_source_code`.
 
 
-# 6. Demo Video
+# Demo Video
 
-https://github.com/user-attachments/assets/e08b7f1e-6681-47a9-82f0-68f72ffcae95
+https://github.com/user-attachments/assets/3431e766-3fdf-455e-b118-e31078ef663e
+
