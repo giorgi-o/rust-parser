@@ -5,9 +5,9 @@
 
 # 1. Code optimisation techniques
 
-We implemented 4 of the optimisation techniques described in class, and an additionnal one that is specific to our program. For each one, we provide an example program in `example_input_source_code/` and `example_output_source_code`. When relevant, we also include an edge case to show that our compiler only optimises the code in cases where the optimisation is valid.
+We implemented 4 of the optimisation techniques described in class, and an additionnal one that is specific to our program. For each one, we provide an example program in `example_input_source_code/` and `example_output_source_code/`. When relevant, we also include an edge case to show that our compiler only optimises the code in cases where the optimisation is valid.
 
-All our optimisations are implemented in `src/clean_ast.rs`.
+All our optimisations are implemented in [`src/clean_ast.rs`](https://github.com/giorgi-o/rust-parser/blob/main/src/clean_ast.rs).
 
 **Note:** Throughout our examples, we make heavy use of the [`blackbox()`](https://doc.rust-lang.org/std/hint/fn.black_box.html) function. This function, for demonstration purposes, prevents our compiler from over-optimising our sample programs, and allows us to showcase only one optimisation per example. At runtime, this function is the identity function and just returns the input value.
 
@@ -15,25 +15,25 @@ All our optimisations are implemented in `src/clean_ast.rs`.
 
 Our code automatically detects expressions such as `x + 0` and `y * 1`, and removes the unecessary computations, leaving only `x` and `y` respectively.
 
-An example of this optimisation can be found in `algebraic_simpl.txt`.
+An example of this optimisation can be found in `algebraic_simpl.txt` ([Input](https://github.com/giorgi-o/rust-parser/blob/main/example_input_source_code/algebraic_simpl.txt), [Output](https://github.com/giorgi-o/rust-parser/blob/main/example_output_source_code/algebraic_simpl.rs)).
 
 ## b. Common subexpression elimination
 
 Our code detects common subexpressions in the code, and replaces them with a variable that stores the result of the computation. This way, the computation is only done once, and the result is reused. Our code also checks that the variables used in the common subexpression have not changed between the two computations.
 
-An example of this optimisation can be found in `cse.txt`.
+An example of this optimisation can be found in `cse.txt` ([Input](https://github.com/giorgi-o/rust-parser/blob/main/example_input_source_code/cse.txt), [Output](https://github.com/giorgi-o/rust-parser/blob/main/example_output_source_code/cse.rs)).
 
 ## c. Loop invariant motion
 
 Our code detects expressions that are computed inside a loop, but whose value does not change during the loop. It then moves the computation outside of the loop, to avoid recomputing the same value multiple times.
 
-An example of this optimisation can be found in `loop_invariant.txt`.
+An example of this optimisation can be found in `loop_invariant.txt` ([Input](https://github.com/giorgi-o/rust-parser/blob/main/example_input_source_code/loop_invariant.txt), [Output](https://github.com/giorgi-o/rust-parser/blob/main/example_output_source_code/loop_invariant.rs)).
 
 ## d. Unreachable code elimination
 
 Our code detects code that is never reached (due to all possible paths leading to it being blocked by a return statement), and removes it from the generated code. This helps optimise the size of the generated code.
 
-An example of this optimisation can be found in `unreachable_code.txt`.
+An example of this optimisation can be found in `unreachable_code.txt` ([Input](https://github.com/giorgi-o/rust-parser/blob/main/example_input_source_code/unreachable_code.txt), [Output](https://github.com/giorgi-o/rust-parser/blob/main/example_output_source_code/unreachable_code.rs)).
 
 ## e. Smart type conversions
 
@@ -47,7 +47,11 @@ To solve this issue, we implemented a smart type conversion system. Our system k
 
 This also opened the door to more advanced optimisations. For example, when converting a `Vec<T>` (vector of Ts) into a `PyList`, we can now check if all elements of the vector are of the same type, and if so, cast the whole vector into a `PyList` of that type. This allows the reuse of the memory allocated by the vector, and avoids the need to cast each element individually.
 
-An example of this optimisation can be found in `full.txt`.
+An example of this optimisation can be found in `full.txt` ([Input](https://github.com/giorgi-o/rust-parser/blob/main/example_input_source_code/full.txt), [Output](https://github.com/giorgi-o/rust-parser/blob/main/example_output_source_code/full.rs)).
+
+# Demo video
+
+https://github.com/user-attachments/assets/428542cb-b2ec-41b6-8b8f-dadef9058b06
 
 # Running our compiler
 
@@ -62,6 +66,7 @@ Once installed, simply run `cargo run -- example_input_source_code/[file].txt`. 
 ## Using Docker
 
 A dockerfile is provided to run our parser in a docker container. To use it, first open the `Dockerfile` file and change which example source code to run it on:
+
 
 ```dockerfile
 # Run the specified Rust file
