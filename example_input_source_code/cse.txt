@@ -1,0 +1,18 @@
+region ExampleRegion {
+    let a = blackbox(1);
+    let b = blackbox(2);
+
+    let c = a + b;
+    let d = a + b; // will become d = c
+    
+    blackbox(c);
+    blackbox(d);
+
+    // test: subexpression is NOT replaced if the value of a or b changes
+    let e = a + b;
+    a = 9;
+    let f = a + b;
+
+    blackbox(e);
+    blackbox(f);
+} 

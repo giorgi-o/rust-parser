@@ -1,0 +1,18 @@
+region ExampleRegion {
+    let a = blackbox(1);
+    let b = blackbox(2);
+
+    // a * b should be moved out of the loop
+    let acc = 0;
+    for (let i = 0; i < 10; i = i + 1) {       
+        acc = acc + a * b;
+    }
+
+    // here, a is modified in the loop so it shouldn't be moved out
+    for (let i = 0; i < 10; i = i + 1) {
+        a = a + 1;       
+        acc = acc + a * b;
+    }
+
+    blackbox(acc);
+} 

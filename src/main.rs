@@ -222,8 +222,8 @@ fn main() {
     let code = codegen::gen_code(region);
     println!("\n{code}");
 
-    // write code to output.rs and pybind_test/lib.rs
-    for outfile in ["output.rs", "pybind_test/src/lib.rs"] {
+    // write code to output.rs and pybind_test/auto.rs
+    for outfile in ["output.rs", "pybind_test/src/auto.rs"] {
         fs::write(outfile, code.clone()).unwrap();
 
         // run rustfmt on output.rs

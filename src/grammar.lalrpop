@@ -89,7 +89,12 @@ Expr: Box<Expr> = {
 };
 
 AddExpr: Box<Expr> = {
-    <l:AddExpr> "<Operator, +>" <r:CmpExpr> => Box::new(Expr::Binary(l, BinaryOp::Add, r)),
+    <l:AddExpr> "<Operator, +>" <r:MulExpr> => Box::new(Expr::Binary(l, BinaryOp::Add, r)),
+    MulExpr
+};
+
+MulExpr: Box<Expr> = {
+    <l:MulExpr> "<Operator, *>" <r:CmpExpr> => Box::new(Expr::Binary(l, BinaryOp::Mult, r)),
     CmpExpr
 };
 

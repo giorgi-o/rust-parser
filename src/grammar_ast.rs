@@ -36,7 +36,7 @@ pub enum Statement {
     Assignment(String, Box<Expr>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Expr {
     Uninitialized, // Added
     Number(i32),
@@ -48,9 +48,10 @@ pub enum Expr {
     MethodCall(Box<Expr>, String, Vec<Box<Expr>>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum BinaryOp {
     Add,
+    Mult,
     LessThan,
     // Add other operators as needed
 }

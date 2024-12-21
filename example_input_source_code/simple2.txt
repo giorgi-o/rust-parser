@@ -1,5 +1,0 @@
-region TradeExecution {
-    let tradeData = allocate(1024);  // Allocate memory for trade data
-    let readAccess = tradeData.borrow(512, 0);  // Immutable borrow
-    let writeAccess = tradeData.borrowMut(512, 0);  // Error! Cannot borrow mutably while immutably borrowed
-}

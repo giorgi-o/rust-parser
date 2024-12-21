@@ -1,0 +1,9 @@
+region ExampleRegion {
+    let a = blackbox(1);
+    blackbox(a);
+
+    return a;
+
+    let b = blackbox(2);
+    blackbox(b);
+} 

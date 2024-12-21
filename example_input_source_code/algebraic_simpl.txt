@@ -1,0 +1,13 @@
+region ExampleRegion {
+    let a = 1;
+    blackbox(a);
+
+    let a1 = a * 1; // will become a1 = a
+    blackbox(a1);
+
+    let b = 2;
+    blackbox(b);
+
+    let b1 = b + 0; // will become b1 = b
+    blackbox(b1);
+} 

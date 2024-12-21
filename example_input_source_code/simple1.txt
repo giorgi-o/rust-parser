@@ -1,8 +1,0 @@
-region TradingData {
-    let buffer = allocate(1024);  // Allocates 1024 bytes in the heap
-    let tempBuffer = buffer.borrow(512, 0);  // Borrow a portion of memory from 'buffer' at index 10
-
-    // Do some work with temp_buffer
-    free(buffer);  // Explicitly free buffer
-
-} 

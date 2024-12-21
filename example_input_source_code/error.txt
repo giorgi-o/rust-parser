@@ -1,3 +1,0 @@
-region ExampleRegion {
-    region ExampleInnerRegion {} // error: regions can't be nested!
-}
